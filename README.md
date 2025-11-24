@@ -20,6 +20,27 @@ Perfect for developers who want a clean, modular, and production-ready user syst
 
 ---
 
+## 🔗 Related Links & Resources
+
+Here are all related resources for the **IdentityUser** package:
+
+### 📦 NPM Package
+https://www.npmjs.com/package/identityuser
+
+### 🧩 Core Repository (Source Code)
+https://github.com/SadeghShojayefard/identityuser
+
+### 🧪 Sample Project (Test Environment)
+A full working Next.js project demonstrating how to use the package:
+
+https://github.com/SadeghShojayefard/identityusers_sample
+
+### 📄 Full Documentation (PDF)
+Complete setup guide and technical explanation:
+https://github.com/SadeghShojayefard/identityusers_sample/blob/main/IdentityUser_Documentation.pdf
+
+---
+
 # 📦 Installation
 
 Run the following command inside your Next.js project:
