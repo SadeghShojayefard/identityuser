@@ -1,0 +1,320 @@
+# IdentityUser
+
+A lightweight and ready-to-use **User Authentication Starter Kit** for Next.js applications.
+IdentityUser helps you quickly scaffold a fully functional authentication system into your project — including models, validation schemas, services, utilities, and optional NextAuth integration.
+
+Perfect for developers who want a clean, modular, and production-ready user system with minimal setup.
+
+---
+
+## ✨ Features
+
+* ✔ Auto-copy authentication boilerplate into your project
+* ✔ Built-in Zod validation
+* ✔ Mongoose user model
+* ✔ Password hashing with bcrypt
+* ✔ NextAuth-ready structure
+* ✔ Zero configuration — just install & run one command
+* ✔ Fully TypeScript-compatible
+* ✔ Clean and maintainable folder structure
+
+---
+
+# 📦 Installation
+
+Run the following command inside your Next.js project:
+
+```
+npm install identityuser
+```
+
+---
+
+# 🚀 Initialize the Authentication Module
+
+IdentityUser includes a CLI tool that copies the entire `src/identityUser` folder into your project.
+
+Run:
+
+```
+npx identityuser
+```
+
+After running this command, a folder like this will appear inside your project:
+
+Note: If a folder named src/identityUser already exists in your project, the CLI will not overwrite it. Instead it will create a new folder with a numeric suffix (identityUser-2, identityUser-3, …) to avoid conflicts. You may need to adjust imports or merge files manually after running the CLI.
+
+```
+src/
+ └── identityUser/
+      ├── models/
+      ├── schemas/
+      ├── services/
+      ├── utils/
+      └── (other required files)
+```
+
+---
+
+# 📚 Required Dependencies
+
+IdentityUser relies on several peer dependencies that **must be installed manually** (npm does not auto-install peerDependencies).
+
+Install all required packages with:
+
+```
+npm install next-auth bcrypt mongoose zod @conform-to/zod @conform-to/react
+```
+
+> 🔹 If you're using TypeScript, also install:
+
+```
+npm install -D @types/bcrypt
+```
+
+---
+
+# 🧠 Zod Validation Note
+
+If you are using **Zod v4**, the `required_error` field has been removed.
+
+So instead of:
+
+```
+z.string({ required_error: "Please fill the Username field first" })
+```
+
+Use:
+
+```
+z.string({ error: "Please fill the Username field first" })
+```
+
+Or use `.min()` / `.email()` / `.max()` validation messages directly.
+
+IdentityUser’s internal schemas follow Zod v4 syntax.
+
+---
+
+# 📁 Folder Structure (Generated After Init)
+
+A full authentication starter pack will be added to:
+
+```
+src/identityUser/
+```
+
+Including:
+app folder
+```
+📦app
+ ┗ 📂api
+ ┃ ┗ 📂auth
+ ┃ ┃ ┗ 📂[...nextauth]
+ ┃ ┃ ┃ ┗ 📜route.ts
+```
+identityUser folder
+```
+identityUser
+ ┣ 📂api
+ ┃ ┣ 📂auth
+ ┃ ┃ ┗ 📂[...nextauth]
+ ┃ ┃ ┃ ┣ 📜authHelpers.ts
+ ┃ ┃ ┃ ┗ 📜options.ts
+ ┃ ┗ 📂session
+ ┃ ┃ ┗ 📂update
+ ┃ ┃ ┃ ┗ 📜route.ts
+ ┣ 📂components
+ ┃ ┗ 📂sessionWatcher
+ ┃ ┃ ┗ 📜SessionWatcher.tsx
+ ┣ 📂helper
+ ┃ ┣ 📜claimsAction.ts
+ ┃ ┣ 📜roleAction.ts
+ ┃ ┣ 📜sharedFunction.ts
+ ┃ ┣ 📜signInFormAction.ts
+ ┃ ┣ 📜signUpformAction.ts
+ ┃ ┗ 📜userAction.ts
+ ┣ 📂lib
+ ┃ ┣ 📂models
+ ┃ ┃ ┣ 📜identityUser_claims.ts
+ ┃ ┃ ┣ 📜identityUser_roleClaims.ts
+ ┃ ┃ ┣ 📜identityUser_roles.ts
+ ┃ ┃ ┣ 📜identityUser_userClaims.ts
+ ┃ ┃ ┣ 📜identityUser_userRoles.ts
+ ┃ ┃ ┗ 📜identityUser_users.ts
+ ┃ ┣ 📜authGuard.ts
+ ┃ ┣ 📜db.ts
+ ┃ ┗ 📜session.ts
+ ┣ 📂providers
+ ┃ ┗ 📜SessionProvider.tsx
+ ┣ 📂Type
+ ┃ ┗ 📜next-auth.d.ts
+ ┗ 📂validation
+ ┃ ┣ 📜addUserValidation.ts
+ ┃ ┣ 📜changeNameValidation.ts
+ ┃ ┣ 📜changePassword.ts
+ ┃ ┣ 📜ChangePasswordUserValidation.ts
+ ┃ ┣ 📜claimsValidation.ts
+ ┃ ┣ 📜deleteValidation.ts
+ ┃ ┣ 📜signInValidation.ts
+ ┃ ┣ 📜signUpValidation.ts
+ ┃ ┣ 📜updateClaimsValidation.ts
+ ┃ ┣ 📜userRoleUpdateValidation.ts
+ ┃ ┣ 📜userRoleValidation.ts
+ ┃ ┣ 📜usersAddValidation.ts
+ ┃ ┗ 📜usersEditValidation.ts
+```
+
+---
+
+# 🛠 Example Usage
+
+### ✔ Get Roles
+
+```ts
+export async function getRolesForAddUserAction() {
+
+    try {
+        await dbConnect();
+
+        const roles = await IdentityUser_Roles.find({}, `name`)
+            .lean<{ _id: mongoose.Types.ObjectId; name: string }[]>()
+            .exec();
+
+
+        return {
+            status: "success",
+            payload: roles.map((role) => ({
+                id: role._id.toString(),
+                name: role.name,
+            })),
+        } as const;
+    } catch (error) {
+        console.error('Error fetching roles:', error);
+        return {
+            status: 'error',
+            payload: [],
+        } as const;
+    }
+}
+```
+
+### ✔ Hashing a password
+
+```ts
+export const hashPassword = async (password: string) => {
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(password, salt);
+    return hash;
+}
+```
+
+
+### ✔ Add New Claim
+```ts
+export async function addClaimAction(prevState: unknown, formData: FormData) {
+    if (!(await hasClaim("add-Claims"))) {
+        return {
+            status: 'error',
+            payload: {
+                message: 'no access for this action',
+            },
+        } as const;
+    }
+
+
+    const subMission = parseWithZod(formData, {
+        schema: claimsSchema(),
+    });
+
+    if (subMission.status !== "success") {
+        return subMission.reply();
+    }
+
+
+    try {
+        // connect to database
+        await dbConnect();
+        // Create new claim and save to database
+        const { claimType, claimValue, description } = subMission.value;
+        await IdentityUser_Claims.create({
+            claimType,
+            claimValue,
+            description
+        });
+
+        // Revalidate the page
+        revalidatePath('/cmsClaims');
+
+        return {
+            status: 'success',
+            payload: {
+                message: '',
+            },
+        } as const;
+    } catch (error) {
+        console.error('Error saving contact form:', error);
+        return {
+            status: 'error',
+            payload: {
+                message: '',
+            },
+        } as const;
+    }
+}
+```
+
+---
+
+# 🔧 Compatibility
+
+IdentityUser supports:
+
+* **Next.js 15+**
+* **Node 18+**
+* **React 18+**
+* **TypeScript or JavaScript**
+
+Tested with Next.js **15** and **16**.
+
+---
+
+# 📌 Upgrade Note (Next.js 15 → 16)
+
+If you want to upgrade an older Next 15 project, run:
+
+```
+npm install next@latest react@latest react-dom@latest
+```
+
+Then update your `tsconfig.json` or `next.config.js` if needed.
+I can guide you step-by-step — just ask when ready.
+
+---
+
+# 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome.
+
+---
+
+# 👤 Author
+
+**Sadegh Shojayefard**
+
+* GitHub: [https://github.com/SadeghShojayefard](https://github.com/SadeghShojayefard)
+* Website: [https://sadegh-shojayee-fard.vercel.app/](https://sadegh-shojayee-fard.vercel.app/)
+* Telegram: [https://t.me/link_lover1](https://t.me/link_lover1)
+* Email: [sadeghshojayefard@gmail.com](mailto:sadeghshojayefard@gmail.com)
+
+---
+
+# 📄 License
+
+MIT License — free for personal and commercial use.
+
+---
+
+# ⭐ Support
+
+If you like this package, don't forget to **star the GitHub repo** once uploaded!
