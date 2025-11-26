@@ -358,7 +358,7 @@ Contributions, issues, and feature requests are welcome.
 # 📜 Changelog
 0.2.0 – Major Action Updates, Bug Fixes
 
-Release date: 2025-xx-xx
+Release date: 2025-11-26
 
 This update improves naming consistency, fixes several bugs, adds new helper methods, and introduces multiple new user-related actions.
 
