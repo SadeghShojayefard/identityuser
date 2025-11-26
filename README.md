@@ -369,7 +369,7 @@ For better readability and consistency:
 	
 | Old Name  | New Name |
 | ------------- | ------------- |
-| changePasswordActione  |	resetPasswordAction|
+| changePasswordAction  |	resetPasswordAction|
 | changePasswordProfileAction   |  changePasswordAction  |
 | checkEmailExistAction   | 	checkUserExistByEmailAction   |
 
