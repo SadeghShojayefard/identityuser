@@ -19,6 +19,29 @@ Perfect for developers who want a clean, modular, and production-ready user syst
 * ✔ Clean and maintainable folder structure
 
 ---
+---
+
+## 🔗 Related Links & Resources
+
+Here are all related resources for the **IdentityUser** package:
+
+### 📦 NPM Package
+https://www.npmjs.com/package/identityuser
+
+### 🧩 Core Repository (Source Code)
+https://github.com/SadeghShojayefard/identityuser
+
+### 🧪 Sample Project (Test Environment)
+A full working Next.js project demonstrating how to use the package:
+
+https://github.com/SadeghShojayefard/identityusers_sample
+
+### 📄 Full Documentation (PDF)
+Complete setup guide and technical explanation:
+https://github.com/SadeghShojayefard/identityusers_sample/blob/main/IdentityUser_Documentation.pdf
+
+---
+---
 
 ## 🔗 Related Links & Resources
 
@@ -68,11 +91,13 @@ Note: If a folder named src/identityUser already exists in your project, the CLI
 ```
 src/
  └── identityUser/
-      ├── models/
-      ├── schemas/
-      ├── services/
-      ├── utils/
-      └── (other required files)
+      ├── api/
+      ├── components/
+      ├── helper/
+      ├── lib/
+      ├── providers/
+      ├── Type/
+      └── validation/
 ```
 
 ---
@@ -330,6 +355,89 @@ Contributions, issues, and feature requests are welcome.
 
 ---
 
+# 📜 Changelog
+0.2.0 – Major Action Updates, Bug Fixes
+
+Release date: 2025-xx-xx
+
+This update improves naming consistency, fixes several bugs, adds new helper methods, and introduces multiple new user-related actions.
+
+## 🔄 Action Renames (Breaking Changes)
+
+For better readability and consistency:
+
+	
+| Old Name  | New Name |
+| ------------- | ------------- |
+| changePasswordActione  |	resetPasswordAction|
+| changePasswordProfileAction   |  changePasswordAction  |
+| checkEmailExistAction   | 	checkUserExistByEmailAction   |
+
+## 🆕 New User Existence Check Actions
+
+These actions help verify whether a user exists based on ID, email, or phone number:
+
+* checkUserExistByIdAction
+* checkUserExistByPhoneNumberAction
+* checkUserExistByEmailAction (renamed)
+
+Shared logic has been moved into a reusable helper:
+* checkUserExistResult
+
+Note: Phone-number checks should only be used when your project requires phone numbers to be unique.
+
+## 🛠 Improved Get User Actions
+
+Bug fixes & improved filtering logic:
+* getUserByIdAction (bug fixed)
+* getUserByUsernameAction (bug fixed)
+
+Newly added:
+* getUserByPhoneNumberAction
+* getUserByEmailAction
+
+Shared helper added:
+* getUserDataSharedFunction
+
+Note: Phone-number lookup should only be enabled when the phone number must remain unique.
+
+## 🧩 User Update Enhancements
+
+* Fixed several bugs in UserUpdateAction
+* Added duplicate-phone-number validation
+* Improved consistency and error-handling
+
+## ✏️ New Profile Update Actions
+
+Two new actions were added for updating user fields:
+* changeUserNameAction
+* changeEmailAction
+
+## 🔐 New Security & Admin Actions
+
+Manually lock or unlock a user: 
+* LockUnlockUserAction
+
+Manually reset the security stamp: 
+* resetSecurityStampAction
+
+## 🔢 Versioning Notes
+
+The version was updated from:
+
+0.1.8 → 0.2.0
+
+
+Because:
+
+* Multiple breaking changes
+* Several new actions
+* Internal refactoring and bug fixes
+* No major architectural overhaul (so no 1.0.0 yet)
+
+---
+
+
 # 📄 License
 
 MIT License — free for personal and commercial use.
@@ -339,3 +447,23 @@ MIT License — free for personal and commercial use.
 # ⭐ Support
 
 If you like this package, don't forget to **star the GitHub repo** once uploaded!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
