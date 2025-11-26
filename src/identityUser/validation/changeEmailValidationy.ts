@@ -6,7 +6,7 @@ export const changeEmailSchema = () => {
         id: z
             .string(),
         newEmail: z
-            .string({ error: "Filling in the Email is required." })
+            .string({ required_error: "Filling in the Email is required." })
             .email({ message: "The Email is not valid" }),
     })
 };

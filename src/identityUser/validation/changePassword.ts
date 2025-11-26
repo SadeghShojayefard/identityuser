@@ -4,19 +4,19 @@ import { z } from 'zod';
 export const changePasswordSchema = () => {
     return z.object({
         username: z
-            .string({ error: "Filling in the UserName is required." })
+            .string({ required_error: "Filling in the UserName is required." })
             .min(5, { message: "The UserName must be at least 5 characters." })
             .max(20, { message: "The UserName must be a maximum of 20 characters." }),
         currentPassword: z
-            .string({ error: "Filling in the CurrentPasswor is required." })
+            .string({ required_error: "Filling in the CurrentPasswor is required." })
             .min(8, { message: "The CurrentPasswor must be at least 8 characters." })
             .max(20, { message: "The CurrentPasswor must be a maximum of 20 characters." }),
         newPassword: z
-            .string({ error: "Filling in the Password is required." })
+            .string({ required_error: "Filling in the Password is required." })
             .min(8, { message: "The ConfirmPassword must be at least 2 characters." })
             .max(20, { message: "The ConfirmPassword must be a maximum of 20 characters." }),
         newPassword2: z
-            .string({ error: "Filling in the ConfirmPassword is required." })
+            .string({ required_error: "Filling in the ConfirmPassword is required." })
             .min(8, { message: "The ConfirmPassword must be at least 2 characters." })
             .max(20, { message: "The Password must be a maximum of 20 characters." }),
     }).refine((data) => data.newPassword === data.newPassword2, {

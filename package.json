@@ -1,6 +1,6 @@
 {
   "name": "identityuser",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Identity & Claims system for Next.js (CLI + Copyable template)",
   "bin": {
     "identityuser": "init.js"
@@ -10,14 +10,14 @@
     "test": "echo \"No tests yet\""
   },
   "peerDependencies": {
-    "@conform-to/zod": "^1.13.3",
+    "@conform-to/zod": ">=1.13.3",
     "bcrypt": ">=6.0.0",
     "mongoose": ">=8.15.1",
     "next": ">=15",
     "next-auth": ">=4",
     "react": ">=18",
     "react-dom": ">=18",
-    "zod": "^4.1.12"
+    "zod": ">=3.25.76"
   },
   "keywords": [
     "nextjs",
