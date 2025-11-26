@@ -21,6 +21,7 @@ import { changePasswordSchema } from "@/identityUser/validation/changePassword";
 import { hasAnyClaim, hasClaim } from "@/identityUser/lib/session";
 import { changeUserNameSchema } from "../validation/changeUserNameValidation";
 import { changeEmailSchema } from "../validation/changeEmailValidationy";
+import identityUser_roleClaims from "../lib/models/identityUser_roleClaims";
 
 
 
@@ -632,7 +633,12 @@ export async function getUserByIdAction(userId: string) {
     // 1) Find User By Id
     const user = await IdentityUser_Users.findById(userId);
     if (!user) {
-        return { status: "error", message: "User not found" };
+        return {
+            status: "error",
+            payload: {
+                message: "User not found",
+            }
+        }
     }
     return await getUserDataSharedFunction(user);
 }
@@ -643,7 +649,12 @@ export async function getUserByUsernameAction(username: string) {
     // 1) Find User by Username
     const user = await IdentityUser_Users.findOne({ normalizedUserName: username.toUpperCase().trim() });
     if (!user) {
-        return { status: "error", message: "User not found" };
+        return {
+            status: "error",
+            payload: {
+                message: "User not found",
+            }
+        }
     }
 
     return await getUserDataSharedFunction(user);
@@ -654,10 +665,84 @@ export async function getUserByEmailAction(email: string) {
     const user = await IdentityUser_Users.findOne({ normalizedEmail: email.toUpperCase().trim() });
 
     if (!user) {
-        return { status: "error", message: "User not found" };
+        return {
+            status: "error",
+            payload: {
+                message: "User not found",
+            }
+        }
     }
 
     return await getUserDataSharedFunction(user);
+}
+
+export async function getUserByUsernameForSessionAction(username: string) {
+    await dbConnect();
+
+    // 1) Find User by Username
+    const user = await IdentityUser_Users.findOne({ username });
+    if (!user) {
+        return { status: "error", message: "User not found" };
+    }
+
+    const userId = user._id.toString();
+
+    // 2) Find User Roles
+    const userRoles = await IdentityUser_UserRoles.find({ user: userId })
+        .populate({
+            path: "role",
+            model: IdentityUser_Roles,
+            select: "name",
+        })
+        .lean();
+
+    const roleIds = userRoles.map(r => r.role._id.toString());
+    const roleNames = userRoles.map(r => r.role.name);
+
+    // 3) Find User Direct Claims
+    const directClaims = await IdentityUser_UserClaims.find({ user: userId })
+        .populate({
+            path: "claim",
+            model: IdentityUser_Claims,
+            select: "claimValue",
+        })
+        .lean({});
+
+    const directClaimNames = directClaims.map(c => c.claim.claimValue);
+
+    // 4)  Find User Roles Claims
+    const roleClaims = await identityUser_roleClaims.find({
+        role: { $in: roleIds },
+    })
+        .populate({
+            path: "claim",
+            model: IdentityUser_Claims,
+            select: "claimValue",
+        })
+        .lean();
+
+    const roleClaimNames = roleClaims.map(c => c.claim.claimValue);
+
+    //Combination of role Claims + direct Claims
+    const mergedClaims = Array.from(
+        new Set([...directClaimNames, ...roleClaimNames])
+    );
+
+    // 6) Creating the final output
+    return {
+        status: "success",
+        payload: {
+            id: userId,
+            username: user.username,
+            name: user.name,
+            email: user.email,
+            avatar: user.avatar,
+            securityStamp: user.securityStamp,
+            password: user.passwordHash,
+            roles: roleNames,          //  String array
+            claims: mergedClaims,      // String array without duplicates
+        }
+    } as const;
 }
 export async function getUserByPhoneNumberAction(phoneNumber: string) {
     await dbConnect();
@@ -666,7 +751,12 @@ export async function getUserByPhoneNumberAction(phoneNumber: string) {
     const user = await IdentityUser_Users.findOne({ phoneNumber: phoneNumber.trim() });
 
     if (!user) {
-        return { status: "error", message: "User not found" };
+        return {
+            status: "error",
+            payload: {
+                message: "User not found",
+            }
+        }
     }
 
     return await getUserDataSharedFunction(user);
@@ -695,10 +785,10 @@ async function getUserDataSharedFunction(user: any) {
     // 4) Creating the final output
 
     return {
-        status: 'error',
+        status: 'success',
         payload: {
             id: user._id.toString(),
-            userName: user.username,
+            username: user.username,
             name: user.name,
             email: user.email,
             emailConfirmed: user.emailConfirmed,
@@ -706,6 +796,9 @@ async function getUserDataSharedFunction(user: any) {
             phoneNumber: user.phoneNumber,
             phoneNumberConfirmed: user.phoneNumberConfirmed,
             accessFailedCount: user.accessFailedCount,
+            avatar: user.avatar,
+            securityStamp: user.securityStamp,
+            password: user.passwordHash,
             roles: userRoles.map((r) => ({
                 roleId: r.role._id.toString(),
                 roleName: r.role.name
@@ -1069,10 +1162,10 @@ export async function LockUnlockUserAction(userId: string) {
             } as const;
         }
 
-        const user = IdentityUser_Users.findById(userId);
+        const user = await IdentityUser_Users.findById(userId);
         let lock = false;
 
-        if (user.lockoutEnabled) {
+        if (user.lockoutEnabled === true) {
             await IdentityUser_Users.findByIdAndUpdate(
                 userId,
                 {
