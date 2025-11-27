@@ -1,4 +1,4 @@
-import { options } from "@/identityUser/api/auth/[...nextauth]/options";
+import { options } from "@/identityuser/api/auth/[...nextauth]/options";
 
 import NextAuth from "next-auth";
 

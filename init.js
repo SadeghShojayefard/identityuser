@@ -7,11 +7,22 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const PACKAGE_SRC = path.join(__dirname, "src", "identityUser");
-const PROJECT_BASE = path.join(process.cwd(), "src");
-let PROJECT_SRC = path.join(PROJECT_BASE, "identityUser");
+// Source folder inside package
+const PACKAGE_SRC = path.join(__dirname, "src", "identityuser");
 
-const NEXTAUTH_ROUTE = path.join(PROJECT_BASE, "app", "api", "auth", "[...nextauth]", "route.ts");
+// Project base
+const PROJECT_BASE = path.join(process.cwd(), "src");
+let PROJECT_SRC = path.join(PROJECT_BASE, "identityuser");
+
+// NextAuth route target
+const NEXTAUTH_ROUTE = path.join(
+    PROJECT_BASE,
+    "app",
+    "api",
+    "auth",
+    "[...nextauth]",
+    "route.ts"
+);
 
 async function ensureFolder(folder) {
     try {
@@ -24,11 +35,12 @@ async function ensureFolder(folder) {
 
 async function findUniqueFolder(base) {
     let folder = base;
-    let counter = 1;
+    let counter = 2;
+
     while (true) {
         try {
             await fs.access(folder);
-            folder = `${base}_${counter++}`;
+            folder = `${base}-${counter++}`;
         } catch {
             return folder;
         }
@@ -51,23 +63,66 @@ async function copyFolder(src, dest) {
     }
 }
 
+
+async function fixImportsInFolder(folder, newName) {
+    const entries = await fs.readdir(folder, { withFileTypes: true });
+
+    for (const entry of entries) {
+        const filePath = path.join(folder, entry.name);
+
+        if (entry.isDirectory()) {
+            await fixImportsInFolder(filePath, newName);
+            continue;
+        }
+
+        const ext = path.extname(entry.name).toLowerCase();
+        const textExts = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".json", ".md"]);
+        if (!textExts.has(ext)) continue;
+
+        let content = await fs.readFile(filePath, "utf8");
+
+
+        content = content
+            .replace(/@\/identityuser\//g, `@/${newName}/`)
+            .replace(/@\/identityuser(?![-\w])/g, `@/${newName}`);
+
+        await fs.writeFile(filePath, content, "utf8");
+    }
+}
+
 (async () => {
     try {
-        console.log("🚀 Initializing identityUser in your project...");
+        console.log("🚀 Initializing identityuser...");
 
         await ensureFolder(PROJECT_BASE);
 
+        // unique folder: identityuser, identityuser-2, identityuser-3, ...
         PROJECT_SRC = await findUniqueFolder(PROJECT_SRC);
+        const newFolderName = path.basename(PROJECT_SRC);
+
         console.log(`📦 Creating folder: ${PROJECT_SRC.replace(process.cwd() + path.sep, "")}`);
         await copyFolder(PACKAGE_SRC, PROJECT_SRC);
 
-        await ensureFolder(path.dirname(NEXTAUTH_ROUTE));
-        const routeContent = `import NextAuth from "next-auth";\nimport { authOptions } from "../../../../identityUser/api/auth/[...nextauth]/options";\n\nexport const GET = NextAuth(authOptions);\nexport const POST = NextAuth(authOptions);`;
-        await fs.writeFile(NEXTAUTH_ROUTE, routeContent);
-        console.log(`✅ Created NextAuth route at: ${NEXTAUTH_ROUTE.replace(process.cwd() + path.sep, "")}`);
+        // only fix imports when folder name has a suffix (-2, -3, etc.)
+        if (newFolderName !== "identityuser") {
+            console.log(`🔧 Fixing internal imports to use @/${newFolderName}/`);
+            await fixImportsInFolder(PROJECT_SRC, newFolderName);
+        }
 
-        console.log("✅ identityUser installed successfully!");
-        console.log("📁 Location:", PROJECT_SRC);
+        // ensure route folder exists
+        await ensureFolder(path.dirname(NEXTAUTH_ROUTE));
+
+        // route.ts content
+        const routeContent = `import NextAuth from "next-auth";
+import { options } from "@/${newFolderName}/api/auth/[...nextauth]/options";
+
+const handler = NextAuth(options);
+export { handler as GET, handler as POST };
+`;
+
+        await fs.writeFile(NEXTAUTH_ROUTE, routeContent, "utf8");
+
+        console.log("✅ identityuser installed successfully!");
     } catch (err) {
         console.error("❌ Error during installation:", err);
         process.exit(1);

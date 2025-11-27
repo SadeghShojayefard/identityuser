@@ -1,24 +1,24 @@
 'use server';
 import { parseWithZod } from "@conform-to/zod";
 import { revalidatePath } from "next/cache";
-import dbConnect from "@/identityUser/lib/db";
+import dbConnect from "@/identityuser/lib/db";
 import { comparePassword, hashPassword } from "./sharedFunction";
 
-import IdentityUser_Users from "@/identityUser/lib/models/identityUser_users";
-import IdentityUser_UserClaims from "@/identityUser/lib/models/identityUser_userClaims"
-import IdentityUser_UserRoles from "@/identityUser/lib/models/identityUser_userRoles"
-import "@/identityUser/lib/models/identityUser_roles";
-import IdentityUser_Roles from "@/identityUser/lib/models/identityUser_roles";
-import IdentityUser_Claims from "@/identityUser/lib/models/identityUser_claims";
+import identityUser_users from "@/identityuser/lib/models/identityUser_users";
+import identityUser_userClaims from "@/identityuser/lib/models/identityUser_userClaims"
+import identityUser_userRoles from "@/identityuser/lib/models/identityUser_userRoles"
+import "@/identityuser/lib/models/identityUser_roles";
+import identityUser_roles from "@/identityuser/lib/models/identityUser_roles";
+import identityUser_claims from "@/identityuser/lib/models/identityUser_claims";
 
-import { usersAddSchema } from "@/identityUser/validation/usersAddValidation";
+import { usersAddSchema } from "@/identityuser/validation/usersAddValidation";
 import { randomUUID } from "crypto";
-import { deleteSchema } from "@/identityUser/validation/deleteValidation";
-import { ChangePasswordUserShema } from "@/identityUser/validation/ChangePasswordUserValidation";
-import { usersEditSchema } from "@/identityUser/validation/usersEditValidation";
-import { changeNameSchema } from "@/identityUser/validation/changeNameValidation";
-import { changePasswordSchema } from "@/identityUser/validation/changePassword";
-import { hasAnyClaim, hasClaim } from "@/identityUser/lib/session";
+import { deleteSchema } from "@/identityuser/validation/deleteValidation";
+import { ChangePasswordUserShema } from "@/identityuser/validation/ChangePasswordUserValidation";
+import { usersEditSchema } from "@/identityuser/validation/usersEditValidation";
+import { changeNameSchema } from "@/identityuser/validation/changeNameValidation";
+import { changePasswordSchema } from "@/identityuser/validation/changePassword";
+import { hasAnyClaim, hasClaim } from "@/identityuser/lib/session";
 import { changeUserNameSchema } from "../validation/changeUserNameValidation";
 import { changeEmailSchema } from "../validation/changeEmailValidationy";
 import identityUser_roleClaims from "../lib/models/identityUser_roleClaims";
@@ -70,7 +70,7 @@ export async function AddUserAction(prevState: unknown, formData: FormData) {
             });
         }
         const encryptPassword = await hashPassword(password);
-        const newUsers = await IdentityUser_Users.create({
+        const newUsers = await identityUser_users.create({
             username,
             normalizedUserName: username.toUpperCase(),
             email,
@@ -96,10 +96,10 @@ export async function AddUserAction(prevState: unknown, formData: FormData) {
                 user: userId,
                 claim: claimId,
             }));
-            await IdentityUser_UserClaims.insertMany(userClaimsDocs, { ordered: false });
+            await identityUser_userClaims.insertMany(userClaimsDocs, { ordered: false });
         }
         if (role !== "false") {
-            await IdentityUser_UserRoles.create({
+            await identityUser_userRoles.create({
                 role: role,
                 user: userId,
             });
@@ -161,7 +161,7 @@ export async function UserUpdateAction(prevState: unknown, formData: FormData) {
 
         // 1) Find User
 
-        const existingUser = await IdentityUser_Users.findById(id);
+        const existingUser = await identityUser_users.findById(id);
         if (!existingUser) {
             return {
                 status: "error",
@@ -217,7 +217,7 @@ export async function UserUpdateAction(prevState: unknown, formData: FormData) {
 
         // 4) Update User Roles
         const newRoleId = role === "false" ? null : role;
-        const currentRole = await IdentityUser_UserRoles.findOne({ user: id });
+        const currentRole = await identityUser_userRoles.findOne({ user: id });
         if (
             (!currentRole && newRoleId) ||
             (currentRole && currentRole.role.toString() !== newRoleId)
@@ -225,18 +225,18 @@ export async function UserUpdateAction(prevState: unknown, formData: FormData) {
             sensitiveChanged = true;
 
             //  Delete current Role
-            await IdentityUser_UserRoles.deleteMany({ user: id });
+            await identityUser_userRoles.deleteMany({ user: id });
 
             // add new Role if Exist
             if (newRoleId) {
-                const roleExists = await IdentityUser_Roles.exists({ _id: newRoleId });
+                const roleExists = await identityUser_roles.exists({ _id: newRoleId });
                 if (roleExists) {
-                    await IdentityUser_UserRoles.create({ user: id, role: newRoleId });
+                    await identityUser_userRoles.create({ user: id, role: newRoleId });
                 }
             }
         }
         // 5) Update UserClaims
-        const existingClaimsDocs = await IdentityUser_UserClaims.find({ user: id }).select("claim").lean();
+        const existingClaimsDocs = await identityUser_userClaims.find({ user: id }).select("claim").lean();
         const existingClaimIds = existingClaimsDocs.map((uc: any) => uc.claim.toString());
 
         const newClaimIds = Array.isArray(selectedClaims) ? selectedClaims : [];
@@ -250,7 +250,7 @@ export async function UserUpdateAction(prevState: unknown, formData: FormData) {
 
         // Removing unnecessary claims
         if (claimsToRemove.length > 0) {
-            await IdentityUser_UserClaims.deleteMany({ user: id, claim: { $in: claimsToRemove } });
+            await identityUser_userClaims.deleteMany({ user: id, claim: { $in: claimsToRemove } });
         }
 
         //  Add new Claims
@@ -259,7 +259,7 @@ export async function UserUpdateAction(prevState: unknown, formData: FormData) {
                 user: id,
                 claim: claimId,
             }));
-            await IdentityUser_UserClaims.insertMany(docs, { ordered: false });
+            await identityUser_userClaims.insertMany(docs, { ordered: false });
         }
 
         // 6) Update the other user data
@@ -286,7 +286,7 @@ export async function UserUpdateAction(prevState: unknown, formData: FormData) {
             updateData.securityStamp = randomUUID();
         }
 
-        await IdentityUser_Users.updateOne({ _id: id }, { $set: updateData });
+        await identityUser_users.updateOne({ _id: id }, { $set: updateData });
 
         // 8) revalidate
         revalidatePath("/cmsUsers");
@@ -328,7 +328,7 @@ export async function deleteUserAction(prevState: unknown, formData: FormData) {
         await dbConnect();
 
         // 1) Find User
-        const user = await IdentityUser_Users.findById(id);
+        const user = await identityUser_users.findById(id);
         if (!user) {
             return {
                 status: 'error',
@@ -337,13 +337,13 @@ export async function deleteUserAction(prevState: unknown, formData: FormData) {
         }
 
         // 2) Delete User Role
-        await IdentityUser_UserRoles.deleteMany({ user: user._id });
+        await identityUser_userRoles.deleteMany({ user: user._id });
 
         // 3) Delete User Direct Claims
-        await IdentityUser_UserClaims.deleteMany({ user: user._id });
+        await identityUser_userClaims.deleteMany({ user: user._id });
 
         // 4) Delete User
-        await IdentityUser_Users.deleteOne({ _id: user._id });
+        await identityUser_users.deleteOne({ _id: user._id });
 
         revalidatePath('/cmsRoles');
 
@@ -386,7 +386,7 @@ export async function resetPasswordAction(prevState: unknown, formData: FormData
             id,
             password,
         } = subMission.value;
-        const existingUser = await IdentityUser_Users.findOne({ _id: id });
+        const existingUser = await identityUser_users.findOne({ _id: id });
         if (!existingUser) {
             return {
                 status: 'error',
@@ -396,7 +396,7 @@ export async function resetPasswordAction(prevState: unknown, formData: FormData
             } as const;
         }
         const encryptPassword = await hashPassword(password);
-        await IdentityUser_Users.findByIdAndUpdate(
+        await identityUser_users.findByIdAndUpdate(
             existingUser._id,
             {
                 $set: {
@@ -448,7 +448,7 @@ export async function changePasswordAction(prevState: unknown, formData: FormDat
             newPassword,
             newPassword2
         } = subMission.value;
-        const existingUser = await IdentityUser_Users.findOne({ username: username.trim() });
+        const existingUser = await identityUser_users.findOne({ username: username.trim() });
         if (!existingUser) {
             return {
                 status: 'error',
@@ -479,7 +479,7 @@ export async function changePasswordAction(prevState: unknown, formData: FormDat
 
         const encryptPassword = await hashPassword(newPassword);
 
-        await IdentityUser_Users.findByIdAndUpdate(
+        await identityUser_users.findByIdAndUpdate(
             existingUser._id,
             {
                 $set: {
@@ -511,11 +511,11 @@ export async function getAllUsersAction() {
     try {
         await dbConnect();
 
-        const usersData = await IdentityUser_Users.aggregate([
+        const usersData = await identityUser_users.aggregate([
             // Connecting roles
             {
                 $lookup: {
-                    from: "identityuser_userroles",
+                    from: "identityUser_userRoles",
                     localField: "_id",
                     foreignField: "user",
                     as: "userRole",
@@ -525,7 +525,7 @@ export async function getAllUsersAction() {
 
             {
                 $lookup: {
-                    from: "identityuser_roles",
+                    from: "identityUser_roles",
                     localField: "userRole.role",
                     foreignField: "_id",
                     as: "roleData",
@@ -536,7 +536,7 @@ export async function getAllUsersAction() {
             // Connecting Claims
             {
                 $lookup: {
-                    from: "identityuser_userclaims",
+                    from: "identityUser_userClaims",
                     localField: "_id",
                     foreignField: "user",
                     as: "userClaims",
@@ -544,7 +544,7 @@ export async function getAllUsersAction() {
             },
             {
                 $lookup: {
-                    from: "identityuser_claims",
+                    from: "identityUser_claims",
                     localField: "userClaims.claim",
                     foreignField: "_id",
                     as: "claimsData",
@@ -593,7 +593,7 @@ export async function getAllUsersAction() {
             { $sort: { createdAt: -1 } },
         ]);
 
-        const total = await IdentityUser_Users.countDocuments();
+        const total = await identityUser_users.countDocuments();
 
         return {
             status: "success",
@@ -631,7 +631,7 @@ export async function getUserByIdAction(userId: string) {
     await dbConnect();
 
     // 1) Find User By Id
-    const user = await IdentityUser_Users.findById(userId);
+    const user = await identityUser_users.findById(userId);
     if (!user) {
         return {
             status: "error",
@@ -647,7 +647,7 @@ export async function getUserByUsernameAction(username: string) {
     await dbConnect();
 
     // 1) Find User by Username
-    const user = await IdentityUser_Users.findOne({ normalizedUserName: username.toUpperCase().trim() });
+    const user = await identityUser_users.findOne({ normalizedUserName: username.toUpperCase().trim() });
     if (!user) {
         return {
             status: "error",
@@ -662,7 +662,7 @@ export async function getUserByUsernameAction(username: string) {
 export async function getUserByEmailAction(email: string) {
     await dbConnect();
     // 1) Find User by Email
-    const user = await IdentityUser_Users.findOne({ normalizedEmail: email.toUpperCase().trim() });
+    const user = await identityUser_users.findOne({ normalizedEmail: email.toUpperCase().trim() });
 
     if (!user) {
         return {
@@ -680,7 +680,7 @@ export async function getUserByUsernameForSessionAction(username: string) {
     await dbConnect();
 
     // 1) Find User by Username
-    const user = await IdentityUser_Users.findOne({ username });
+    const user = await identityUser_users.findOne({ username });
     if (!user) {
         return { status: "error", message: "User not found" };
     }
@@ -688,10 +688,10 @@ export async function getUserByUsernameForSessionAction(username: string) {
     const userId = user._id.toString();
 
     // 2) Find User Roles
-    const userRoles = await IdentityUser_UserRoles.find({ user: userId })
+    const userRoles = await identityUser_userRoles.find({ user: userId })
         .populate({
             path: "role",
-            model: IdentityUser_Roles,
+            model: identityUser_roles,
             select: "name",
         })
         .lean();
@@ -700,10 +700,10 @@ export async function getUserByUsernameForSessionAction(username: string) {
     const roleNames = userRoles.map(r => r.role.name);
 
     // 3) Find User Direct Claims
-    const directClaims = await IdentityUser_UserClaims.find({ user: userId })
+    const directClaims = await identityUser_userClaims.find({ user: userId })
         .populate({
             path: "claim",
-            model: IdentityUser_Claims,
+            model: identityUser_claims,
             select: "claimValue",
         })
         .lean({});
@@ -716,7 +716,7 @@ export async function getUserByUsernameForSessionAction(username: string) {
     })
         .populate({
             path: "claim",
-            model: IdentityUser_Claims,
+            model: identityUser_claims,
             select: "claimValue",
         })
         .lean();
@@ -748,7 +748,7 @@ export async function getUserByPhoneNumberAction(phoneNumber: string) {
     await dbConnect();
     // use this action only when use phoneNumber as uniq field for each user
     // 1) Find User by phoneNumber
-    const user = await IdentityUser_Users.findOne({ phoneNumber: phoneNumber.trim() });
+    const user = await identityUser_users.findOne({ phoneNumber: phoneNumber.trim() });
 
     if (!user) {
         return {
@@ -765,19 +765,19 @@ export async function getUserByPhoneNumberAction(phoneNumber: string) {
 
 async function getUserDataSharedFunction(user: any) {
     // 2) Find User Roles
-    const userRoles = await IdentityUser_UserRoles.find({ user: user._id })
+    const userRoles = await identityUser_userRoles.find({ user: user._id })
         .populate({
             path: "role",
-            model: IdentityUser_Roles,
+            model: identityUser_roles,
             select: "name ",
         })
         .lean();
 
     // 3) Find User Direct Claim
-    const userClaims = await IdentityUser_UserClaims.find({ user: user._id })
+    const userClaims = await identityUser_userClaims.find({ user: user._id })
         .populate({
             path: "claim",
-            model: IdentityUser_Claims,
+            model: identityUser_claims,
             select: "  description",
         })
         .lean();
@@ -837,7 +837,7 @@ export async function changeNameAction(prevState: unknown, formData: FormData) {
             name
         } = subMission.value;
 
-        const existingUser = await IdentityUser_Users.findOne({ username: username.trim() });
+        const existingUser = await identityUser_users.findOne({ username: username.trim() });
         if (!existingUser) {
             return {
                 status: 'error',
@@ -849,7 +849,7 @@ export async function changeNameAction(prevState: unknown, formData: FormData) {
 
 
         if (existingUser.concurrencyStamp === ccs) {
-            await IdentityUser_Users.findByIdAndUpdate(
+            await identityUser_users.findByIdAndUpdate(
                 existingUser._id,
                 {
                     $set: {
@@ -911,7 +911,7 @@ export async function changeUserNameAction(prevState: unknown, formData: FormDat
             newUserName,
         } = subMission.value;
 
-        const existingUser = await IdentityUser_Users.findById(id);
+        const existingUser = await identityUser_users.findById(id);
         if (!existingUser) {
             return {
                 status: 'error',
@@ -929,7 +929,7 @@ export async function changeUserNameAction(prevState: unknown, formData: FormDat
                     payload: { message: "Username already exists." },
                 } as const;
             }
-            await IdentityUser_Users.findByIdAndUpdate(
+            await identityUser_users.findByIdAndUpdate(
                 existingUser._id,
                 {
                     $set: {
@@ -986,7 +986,7 @@ export async function changeEmailAction(prevState: unknown, formData: FormData) 
             newEmail,
         } = subMission.value;
 
-        const existingUser = await IdentityUser_Users.findById(id);
+        const existingUser = await identityUser_users.findById(id);
         if (!existingUser) {
             return {
                 status: 'error',
@@ -1004,7 +1004,7 @@ export async function changeEmailAction(prevState: unknown, formData: FormData) 
                     payload: { message: "Email already exists." },
                 } as const;
             }
-            await IdentityUser_Users.findByIdAndUpdate(
+            await identityUser_users.findByIdAndUpdate(
                 existingUser._id,
                 {
                     $set: {
@@ -1042,7 +1042,7 @@ export async function changeEmailAction(prevState: unknown, formData: FormData) 
 export async function checkUserExistByUserNameAction(username: string) {
     await dbConnect();
     try {
-        const existingUser = await IdentityUser_Users.findOne({ normalizedUserName: username.toUpperCase().trim() });
+        const existingUser = await identityUser_users.findOne({ normalizedUserName: username.toUpperCase().trim() });
         return checkUserExistResult(existingUser);
 
     } catch (error) {
@@ -1058,7 +1058,7 @@ export async function checkUserExistByUserNameAction(username: string) {
 export async function checkUserExistByIdAction(Id: string) {
     await dbConnect();
     try {
-        const existingUser = await IdentityUser_Users.findOne({ _id: Id.trim() });
+        const existingUser = await identityUser_users.findOne({ _id: Id.trim() });
         return checkUserExistResult(existingUser);
 
     } catch (error) {
@@ -1076,7 +1076,7 @@ export async function checkUserExistByPhoneNumberAction(phoneNumber: string) {
     // use this action only when use phoneNumber as uniq field for each user
     await dbConnect();
     try {
-        const existingUser = await IdentityUser_Users.findOne({ phoneNumber: phoneNumber.trim() });
+        const existingUser = await identityUser_users.findOne({ phoneNumber: phoneNumber.trim() });
         return checkUserExistResult(existingUser);
     } catch (error) {
         return {
@@ -1091,7 +1091,7 @@ export async function checkUserExistByPhoneNumberAction(phoneNumber: string) {
 export async function checkUserExistByEmailAction(email: string) {
     await dbConnect();
     try {
-        const existingUser = await IdentityUser_Users.findOne({ normalizedEmail: email.toUpperCase().trim() });
+        const existingUser = await identityUser_users.findOne({ normalizedEmail: email.toUpperCase().trim() });
         return checkUserExistResult(existingUser);
     } catch (error) {
         return {
@@ -1121,7 +1121,7 @@ function checkUserExistResult(existingUser: any) {
 export async function getCurrentCCSAction(username: string) {
     await dbConnect();
     try {
-        const existingUser = await IdentityUser_Users.findOne({ normalizedUserName: username.toUpperCase().trim() });
+        const existingUser = await identityUser_users.findOne({ normalizedUserName: username.toUpperCase().trim() });
         if (existingUser) {
             return {
                 status: 'success',
@@ -1162,11 +1162,11 @@ export async function LockUnlockUserAction(userId: string) {
             } as const;
         }
 
-        const user = await IdentityUser_Users.findById(userId);
+        const user = await identityUser_users.findById(userId);
         let lock = false;
 
         if (user.lockoutEnabled === true) {
-            await IdentityUser_Users.findByIdAndUpdate(
+            await identityUser_users.findByIdAndUpdate(
                 userId,
                 {
 
@@ -1181,7 +1181,7 @@ export async function LockUnlockUserAction(userId: string) {
             ).exec();
         }
         else {
-            await IdentityUser_Users.findByIdAndUpdate(
+            await identityUser_users.findByIdAndUpdate(
                 userId,
                 {
 
@@ -1231,7 +1231,7 @@ export async function resetSecurityStampAction(userId: string) {
             } as const;
         }
 
-        await IdentityUser_Users.findByIdAndUpdate(
+        await identityUser_users.findByIdAndUpdate(
             userId,
             {
 

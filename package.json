@@ -1,6 +1,6 @@
 {
   "name": "identityuser",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Identity & Claims system for Next.js (CLI + Copyable template)",
   "bin": {
     "identityuser": "init.js"

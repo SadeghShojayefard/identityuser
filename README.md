@@ -360,6 +360,23 @@ Contributions, issues, and feature requests are welcome.
 
 Release date: 2025-11-26
 
+## 📂 Installer Improvements (New)
+
+The installer is now fully smart and collision-safe:
+
+✔ If the identityuser folder already exists, a new version is automatically created:
+identityuser, identityuser-2, identityuser-3, ...
+
+✔ All internal imports are automatically rewritten:
+from @/identityuser/...
+to @/identityuser-2/... (or the correct version)
+
+✔ The NextAuth route file is always rewritten with the correct import path.
+
+Result: multiple installations without conflicts, no broken imports, and no accidental file overwrites.
+
+---
+
 This update improves naming consistency, fixes several bugs, adds new helper methods, and introduces multiple new user-related actions.
 
 ## 🔄 Action Renames (Breaking Changes)
