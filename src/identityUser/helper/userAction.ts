@@ -23,8 +23,6 @@ import { changeUserNameSchema } from "../validation/changeUserNameValidation";
 import { changeEmailSchema } from "../validation/changeEmailValidationy";
 import identityUser_roleClaims from "../lib/models/identityUser_roleClaims";
 
-
-
 export async function AddUserAction(prevState: unknown, formData: FormData) {
     // if (!(await hasClaim("add-user"))) {
     //     return {
@@ -122,7 +120,6 @@ export async function AddUserAction(prevState: unknown, formData: FormData) {
         } as const;
     }
 }
-
 
 export async function UserUpdateAction(prevState: unknown, formData: FormData) {
     // if (!(await hasClaim("edit-user"))) {
@@ -423,6 +420,7 @@ export async function resetPasswordAction(prevState: unknown, formData: FormData
         } as const;
     }
 }
+
 export async function changePasswordAction(prevState: unknown, formData: FormData) {
     if (!(await hasAnyClaim())) {
         return {
@@ -512,10 +510,10 @@ export async function getAllUsersAction() {
         await dbConnect();
 
         const usersData = await identityUser_users.aggregate([
-            // Connecting roles
+            // User Roles
             {
                 $lookup: {
-                    from: "identityUser_userRoles",
+                    from: "identityuser_userroles",
                     localField: "_id",
                     foreignField: "user",
                     as: "userRole",
@@ -525,7 +523,7 @@ export async function getAllUsersAction() {
 
             {
                 $lookup: {
-                    from: "identityUser_roles",
+                    from: "identityuser_roles",
                     localField: "userRole.role",
                     foreignField: "_id",
                     as: "roleData",
@@ -533,10 +531,10 @@ export async function getAllUsersAction() {
             },
             { $unwind: { path: "$roleData", preserveNullAndEmptyArrays: true } },
 
-            // Connecting Claims
+            // User Claims
             {
                 $lookup: {
-                    from: "identityUser_userClaims",
+                    from: "identityuser_userclaims",
                     localField: "_id",
                     foreignField: "user",
                     as: "userClaims",
@@ -544,14 +542,14 @@ export async function getAllUsersAction() {
             },
             {
                 $lookup: {
-                    from: "identityUser_claims",
+                    from: "identityuser_claims",
                     localField: "userClaims.claim",
                     foreignField: "_id",
                     as: "claimsData",
                 },
             },
 
-            // Output Field
+            // Output
             {
                 $project: {
                     _id: 1,
@@ -574,22 +572,27 @@ export async function getAllUsersAction() {
                     lockoutEnabled: 1,
                     accessFailedCount: 1,
                     createdAt: 1,
+
                     role: {
                         id: { $toString: "$roleData._id" },
                         name: "$roleData.name",
                     },
+
                     claims: {
                         $map: {
                             input: "$claimsData",
                             as: "claim",
                             in: {
                                 id: { $toString: "$$claim._id" },
+                                claimType: "$$claim.claimType",
+                                claimValue: "$$claim.claimValue",
                                 description: "$$claim.description",
                             },
                         },
                     },
                 },
             },
+
             { $sort: { createdAt: -1 } },
         ]);
 
@@ -618,6 +621,7 @@ export async function getAllUsersAction() {
             })),
             total,
         } as const;
+
     } catch (error) {
         console.error("Error fetching users:", error);
         return {
@@ -627,6 +631,7 @@ export async function getAllUsersAction() {
     }
 }
 
+
 export async function getUserByIdAction(userId: string) {
     await dbConnect();
 
@@ -635,10 +640,8 @@ export async function getUserByIdAction(userId: string) {
     if (!user) {
         return {
             status: "error",
-            payload: {
-                message: "User not found",
-            }
-        }
+            message: "User not found",
+        } as const;
     }
     return await getUserDataSharedFunction(user);
 }
@@ -651,26 +654,22 @@ export async function getUserByUsernameAction(username: string) {
     if (!user) {
         return {
             status: "error",
-            payload: {
-                message: "User not found",
-            }
-        }
+            message: "User not found",
+        } as const;
     }
 
     return await getUserDataSharedFunction(user);
 }
+
 export async function getUserByEmailAction(email: string) {
     await dbConnect();
     // 1) Find User by Email
     const user = await identityUser_users.findOne({ normalizedEmail: email.toUpperCase().trim() });
-
     if (!user) {
         return {
             status: "error",
-            payload: {
-                message: "User not found",
-            }
-        }
+            message: "User not found",
+        } as const;
     }
 
     return await getUserDataSharedFunction(user);
@@ -744,6 +743,7 @@ export async function getUserByUsernameForSessionAction(username: string) {
         }
     } as const;
 }
+
 export async function getUserByPhoneNumberAction(phoneNumber: string) {
     await dbConnect();
     // use this action only when use phoneNumber as uniq field for each user
@@ -753,15 +753,12 @@ export async function getUserByPhoneNumberAction(phoneNumber: string) {
     if (!user) {
         return {
             status: "error",
-            payload: {
-                message: "User not found",
-            }
-        }
+            message: "User not found",
+        } as const;
     }
 
     return await getUserDataSharedFunction(user);
 }
-
 
 async function getUserDataSharedFunction(user: any) {
     // 2) Find User Roles
@@ -1038,7 +1035,6 @@ export async function changeEmailAction(prevState: unknown, formData: FormData) 
     }
 }
 
-
 export async function checkUserExistByUserNameAction(username: string) {
     await dbConnect();
     try {
@@ -1147,12 +1143,28 @@ export async function getCurrentCCSAction(username: string) {
     }
 }
 
-export async function LockUnlockUserAction(userId: string) {
+export async function LockUnlockUserAction(prevState: unknown, formData: FormData) {
+
+    // if (!(await hasAnyClaim())) {
+    //     return {
+    //         status: 'error',
+    //         payload: {
+    //             message: 'no access for this action',
+    //         },
+    //     } as const;
+    // }
+    const subMission = parseWithZod(formData, {
+        schema: deleteSchema(),
+    });
+
+    if (subMission.status !== "success") {
+        return subMission.reply();
+    }
 
     try {
         await dbConnect();
 
-        const existingUser = await checkUserExistByIdAction(userId);
+        const existingUser = await checkUserExistByIdAction(subMission.value.id);
         if (!existingUser) {
             return {
                 status: 'error',
@@ -1162,18 +1174,18 @@ export async function LockUnlockUserAction(userId: string) {
             } as const;
         }
 
-        const user = await identityUser_users.findById(userId);
+        const user = await identityUser_users.findById(subMission.value.id);
         let lock = false;
 
         if (user.lockoutEnabled === true) {
             await identityUser_users.findByIdAndUpdate(
-                userId,
+                subMission.value.id,
                 {
 
                     $set: {
 
-                        lockoutEnd: false,
-                        lockoutEnabled: null,
+                        lockoutEnd: null,
+                        lockoutEnabled: false,
                         accessFailedCount: 0,
                         securityStamp: randomUUID(),
                     }
@@ -1181,14 +1193,15 @@ export async function LockUnlockUserAction(userId: string) {
             ).exec();
         }
         else {
+
             await identityUser_users.findByIdAndUpdate(
-                userId,
+                subMission.value.id,
                 {
 
                     $set: {
 
-                        lockoutEnd: true,
-                        lockoutEnabled: new Date(8640000000000000),
+                        lockoutEnd: new Date(8640000000000000),
+                        lockoutEnabled: true,
                         accessFailedCount: 5,
                         securityStamp: randomUUID(),
                     }
@@ -1216,12 +1229,27 @@ export async function LockUnlockUserAction(userId: string) {
     }
 }
 
-export async function resetSecurityStampAction(userId: string) {
+export async function resetSecurityStampAction(prevState: unknown, formData: FormData) {
 
+    // if (!(await hasAnyClaim())) {
+    //     return {
+    //         status: 'error',
+    //         payload: {
+    //             message: 'no access for this action',
+    //         },
+    //     } as const;
+    // }
+    const subMission = parseWithZod(formData, {
+        schema: deleteSchema(),
+    });
+
+    if (subMission.status !== "success") {
+        return subMission.reply();
+    }
     try {
         await dbConnect();
 
-        const existingUser = await checkUserExistByIdAction(userId);
+        const existingUser = await checkUserExistByIdAction(subMission.value.id);
         if (!existingUser) {
             return {
                 status: 'error',
@@ -1232,7 +1260,7 @@ export async function resetSecurityStampAction(userId: string) {
         }
 
         await identityUser_users.findByIdAndUpdate(
-            userId,
+            subMission.value.id,
             {
 
                 $set: {

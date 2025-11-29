@@ -275,46 +275,58 @@ export async function getRolesAction() {
 
     try {
         const rolesWithClaims = await identityUser_roles.aggregate([
+            // مرحله 1: پیدا کردن roleClaims برای هر role
             {
                 $lookup: {
-                    from: "identityUser_roleClaims",
+                    from: "identityuser_roleclaims",
                     localField: "_id",
                     foreignField: "role",
                     as: "roleClaims",
                 },
             },
+
+            // مرحله 2: باز کردن roleClaims (ممکنه خالی باشه)
             {
                 $unwind: {
                     path: "$roleClaims",
                     preserveNullAndEmptyArrays: true,
                 },
             },
+
+            // مرحله 3: لود claim اصلی
             {
                 $lookup: {
-                    from: "identityUser_claims",
+                    from: "identityuser_claims",
                     localField: "roleClaims.claim",
                     foreignField: "_id",
                     as: "claimData",
                 },
             },
+
+            // مرحله 4: باز کردن claimData
             {
                 $unwind: {
                     path: "$claimData",
                     preserveNullAndEmptyArrays: true,
                 },
             },
+
+            // مرحله 5: گروه‌بندی نهایی
             {
                 $group: {
                     _id: "$_id",
                     name: { $first: "$name" },
                     description: { $first: "$description" },
                     claimStamp: { $first: "$claimStamp" },
+
                     claims: {
                         $push: {
                             $cond: [
                                 { $ifNull: ["$claimData", false] },
                                 {
                                     id: { $toString: "$claimData._id" },
+                                    claimType: "$claimData.claimType",
+                                    claimValue: "$claimData.claimValue",
                                     description: "$claimData.description",
                                 },
                                 "$$REMOVE",
@@ -332,17 +344,18 @@ export async function getRolesAction() {
                 name: role.name,
                 description: role.description,
                 claimStamp: role.claimStamp,
-                claims: role.claims || [],
+                claims: role.claims,
             })),
-        } as const;
+        };
     } catch (error) {
         console.error('Error fetching roles:', error);
         return {
-            status: 'error',
+            status: "error",
             payload: [],
-        } as const;
+        };
     }
 }
+
 
 export async function getRolesForAddUserAction() {
 
@@ -372,7 +385,6 @@ export async function getRolesForAddUserAction() {
 
 
 export async function getRoleByIDAction(roleId: string) {
-
     try {
         await dbConnect();
         const roleObjectId = new mongoose.Types.ObjectId(roleId);
@@ -381,9 +393,10 @@ export async function getRoleByIDAction(roleId: string) {
             {
                 $match: { _id: roleObjectId },
             },
+            // Load roleClaims
             {
                 $lookup: {
-                    from: "identityUser_roleClaims",
+                    from: "identityuser_roleclaims",
                     localField: "_id",
                     foreignField: "role",
                     as: "roleClaims",
@@ -395,9 +408,10 @@ export async function getRoleByIDAction(roleId: string) {
                     preserveNullAndEmptyArrays: true,
                 },
             },
+            // Load claimData
             {
                 $lookup: {
-                    from: "identityUser_claims",
+                    from: "identityuser_claims",
                     localField: "roleClaims.claim",
                     foreignField: "_id",
                     as: "claimData",
@@ -409,12 +423,14 @@ export async function getRoleByIDAction(roleId: string) {
                     preserveNullAndEmptyArrays: true,
                 },
             },
+            // Final grouping
             {
                 $group: {
                     _id: "$_id",
                     name: { $first: "$name" },
                     description: { $first: "$description" },
                     concurrencyStamp: { $first: "$concurrencyStamp" },
+
                     claims: {
                         $push: {
                             $cond: [
@@ -461,6 +477,5 @@ export async function getRoleByIDAction(roleId: string) {
         } as const;
     }
 }
-
 
 
