@@ -11,6 +11,7 @@ Perfect for developers who want a clean, modular, and production-ready user syst
 
 * ✔ Auto-copy authentication boilerplate into your project
 * ✔ Built-in Zod validation
+* ✔ Resend-ready to send email to user 
 * ✔ Mongoose user model
 * ✔ Password hashing with bcrypt
 * ✔ NextAuth-ready structure
@@ -41,27 +42,6 @@ Complete setup guide and technical explanation:
 https://github.com/SadeghShojayefard/identityusers_sample/blob/main/IdentityUser_Documentation.pdf
 
 ---
----
-
-## 🔗 Related Links & Resources
-
-Here are all related resources for the **IdentityUser** package:
-
-### 📦 NPM Package
-https://www.npmjs.com/package/identityuser
-
-### 🧩 Core Repository (Source Code)
-https://github.com/SadeghShojayefard/identityuser
-
-### 🧪 Sample Project (Test Environment)
-A full working Next.js project demonstrating how to use the package:
-
-https://github.com/SadeghShojayefard/identityusers_sample
-
-### 📄 Full Documentation (PDF)
-Complete setup guide and technical explanation:
-https://github.com/SadeghShojayefard/identityusers_sample/blob/main/IdentityUser_Documentation.pdf
-
 ---
 
 # 📦 Installation
@@ -108,14 +88,15 @@ IdentityUser relies on several peer dependencies that **must be installed manual
 
 Install all required packages with:
 
-```
-npm install next-auth bcrypt mongoose zod @conform-to/zod @conform-to/react
+```  
+npm install next-auth bcrypt mongoose zod @conform-to/zod @conform-to/react resend @upstash/ratelimit @upstash/redis otplib qrcode
 ```
 
-> 🔹 If you're using TypeScript, also install:
+> 🔹 If you're using TypeScript, also install to get the bycrypt and :
 
 ```
-npm install -D @types/bcrypt
+npm install -D @types/bcrypt @types/qrcode
+
 ```
 
 ---
@@ -153,62 +134,79 @@ src/identityUser/
 Including:
 app folder
 ```
-📦app
- ┗ 📂api
- ┃ ┗ 📂auth
- ┃ ┃ ┗ 📂[...nextauth]
- ┃ ┃ ┃ ┗ 📜route.ts
+📦src
+ ┣ 📂app
+ ┃ ┗ 📂api
+ ┃ ┃ ┣ 📂auth
+ ┃ ┃ ┃ ┗ 📂[...nextauth]
+ ┃ ┃ ┃ ┃ ┗ 📜route.ts
+ ┃ ┃ ┗ 📂session
+ ┃ ┃ ┃ ┗ 📂update
+ ┃ ┃ ┃ ┃ ┗ 📜route.ts
 ```
 identityUser folder
 ```
-identityUser
- ┣ 📂api
- ┃ ┣ 📂auth
- ┃ ┃ ┗ 📂[...nextauth]
- ┃ ┃ ┃ ┣ 📜authHelpers.ts
- ┃ ┃ ┃ ┗ 📜options.ts
- ┃ ┗ 📂session
- ┃ ┃ ┗ 📂update
- ┃ ┃ ┃ ┗ 📜route.ts
- ┣ 📂components
- ┃ ┗ 📂sessionWatcher
- ┃ ┃ ┗ 📜SessionWatcher.tsx
- ┣ 📂helper
- ┃ ┣ 📜claimsAction.ts
- ┃ ┣ 📜roleAction.ts
- ┃ ┣ 📜sharedFunction.ts
- ┃ ┣ 📜signInFormAction.ts
- ┃ ┣ 📜signUpformAction.ts
- ┃ ┗ 📜userAction.ts
- ┣ 📂lib
- ┃ ┣ 📂models
- ┃ ┃ ┣ 📜identityUser_claims.ts
- ┃ ┃ ┣ 📜identityUser_roleClaims.ts
- ┃ ┃ ┣ 📜identityUser_roles.ts
- ┃ ┃ ┣ 📜identityUser_userClaims.ts
- ┃ ┃ ┣ 📜identityUser_userRoles.ts
- ┃ ┃ ┗ 📜identityUser_users.ts
- ┃ ┣ 📜authGuard.ts
- ┃ ┣ 📜db.ts
- ┃ ┗ 📜session.ts
- ┣ 📂providers
- ┃ ┗ 📜SessionProvider.tsx
- ┣ 📂Type
- ┃ ┗ 📜next-auth.d.ts
- ┗ 📂validation
- ┃ ┣ 📜addUserValidation.ts
- ┃ ┣ 📜changeNameValidation.ts
- ┃ ┣ 📜changePassword.ts
- ┃ ┣ 📜ChangePasswordUserValidation.ts
- ┃ ┣ 📜claimsValidation.ts
- ┃ ┣ 📜deleteValidation.ts
- ┃ ┣ 📜signInValidation.ts
- ┃ ┣ 📜signUpValidation.ts
- ┃ ┣ 📜updateClaimsValidation.ts
- ┃ ┣ 📜userRoleUpdateValidation.ts
- ┃ ┣ 📜userRoleValidation.ts
- ┃ ┣ 📜usersAddValidation.ts
- ┃ ┗ 📜usersEditValidation.ts
+📦src
+ ┗ 📂identityUser
+ ┃ ┣ 📂api
+ ┃ ┃ ┗ 📂auth
+ ┃ ┃ ┃ ┗ 📂[...nextauth]
+ ┃ ┃ ┃ ┃ ┣ 📜authHelpers.ts
+ ┃ ┃ ┃ ┃ ┗ 📜options.ts
+ ┃ ┣ 📂components
+ ┃ ┃ ┗ 📂sessionWatcher
+ ┃ ┃ ┃ ┗ 📜SessionWatcher.tsx
+ ┃ ┣ 📂helper
+ ┃ ┃ ┣ 📜claimsAction.ts
+ ┃ ┃ ┣ 📜roleAction.ts
+ ┃ ┃ ┣ 📜sharedFunction.ts
+ ┃ ┃ ┣ 📜signInAction.ts
+ ┃ ┃ ┣ 📜signUpformAction.ts
+ ┃ ┃ ┗ 📜userAction.ts
+ ┃ ┣ 📂lib
+ ┃ ┃ ┣ 📂models
+ ┃ ┃ ┃ ┣ 📜identityUser_claims.ts
+ ┃ ┃ ┃ ┣ 📜identityUser_roleClaims.ts
+ ┃ ┃ ┃ ┣ 📜identityUser_roles.ts
+ ┃ ┃ ┃ ┣ 📜identityUser_Tokens.ts
+ ┃ ┃ ┃ ┣ 📜identityUser_userClaims.ts
+ ┃ ┃ ┃ ┣ 📜identityUser_userRoles.ts
+ ┃ ┃ ┃ ┗ 📜identityUser_users.ts
+ ┃ ┃ ┣ 📂utils
+ ┃ ┃ ┃ ┗ 📜rateLimit.ts
+ ┃ ┃ ┣ 📜authGuard.ts
+ ┃ ┃ ┣ 📜db.ts
+ ┃ ┃ ┗ 📜session.ts
+ ┃ ┣ 📂providers
+ ┃ ┃ ┗ 📜SessionProvider.tsx
+ ┃ ┣ 📂Type
+ ┃ ┃ ┗ 📜next-auth.d.ts
+ ┃ ┗ 📂validation
+ ┃ ┃ ┣ 📜addUserValidation.ts
+ ┃ ┃ ┣ 📜changeEmailValidation.ts
+ ┃ ┃ ┣ 📜changeEmailValidationy.ts
+ ┃ ┃ ┣ 📜changeNameValidation.ts
+ ┃ ┃ ┣ 📜changePassword.ts
+ ┃ ┃ ┣ 📜ChangePasswordUserValidation.ts
+ ┃ ┃ ┣ 📜changePhoneNumebrValidation.ts
+ ┃ ┃ ┣ 📜changeUserNameValidation.ts
+ ┃ ┃ ┣ 📜claimsValidation.ts
+ ┃ ┃ ┣ 📜deleteValidation.ts
+ ┃ ┃ ┣ 📜emailVerifyValidation.ts
+ ┃ ┃ ┣ 📜forgetPasswordValidation.ts
+ ┃ ┃ ┣ 📜otpValidation.ts
+ ┃ ┃ ┣ 📜phoneVerifyValidation.ts
+ ┃ ┃ ┣ 📜resetPasswordValidation.ts
+ ┃ ┃ ┣ 📜signInValidation.ts
+ ┃ ┃ ┣ 📜signUpValidation.ts
+ ┃ ┃ ┣ 📜twoStepEnableValidation.ts
+ ┃ ┃ ┣ 📜updateClaimsValidation.ts
+ ┃ ┃ ┣ 📜userRoleUpdateValidation.ts
+ ┃ ┃ ┣ 📜userRoleValidation.ts
+ ┃ ┃ ┣ 📜usersAddValidation.ts
+ ┃ ┃ ┣ 📜usersEditValidation.ts
+ ┃ ┃ ┣ 📜verify2FAValidation.ts
+ ┃ ┃ ┗ 📜verify2StepValidation.ts
 ```
 
 ---
@@ -356,6 +354,73 @@ Contributions, issues, and feature requests are welcome.
 ---
 
 # 📜 Changelog
+
+## 0.3.0 – Full Verification System, Forgot Password, and TOTP 2FA
+
+**Release Date:** 2025-02-05
+
+This release introduces the most advanced security features added to IdentityUser so far.  
+A complete verification system is now available, including password recovery, email/phone verification, and full TOTP-based two-factor authentication.
+
+---
+
+## 🔐 New Authentication & Security Features
+
+| Feature             | Description                                   |
+|--------------------|-----------------------------------------------|
+| Forgot Password     | Reset password via email or phone OTP         |
+| Email Verification  | Verify user email with a sending token to email         |
+| Phone Verification  | Verify phone number with OTP                  |
+| OTP Login           | Two-step login with TOTP 2FA          |
+| TOTP 2FA            | Authenticator app support (Google Authenticator, Authy, etc.) |
+| Recovery Codes      | Backup codes for emergency login             |
+
+---
+
+## 🆕 New Actions Added
+
+### 🔑 Password Recovery
+- `forgotPasswordRequestAction`  
+- `createEmailPasswordResetTokenAction`  
+- `sendPasswordResetEmail`  
+- `resetForgetPasswordAction`  
+- `createPhonePasswordResetTokenAction`  
+- `verifyOtpAction`  
+
+### 📧 Email Verification
+- `createEmailVerificationToken`  
+- `sendVerifyTokenForEmail`  
+- `verifyEmailToken`  
+
+### 📱 Phone Verification
+- `creatPhoneVerificationOTP`  
+- `verifyPhoneAction`  
+
+
+### 🛡 TOTP Two-Factor Authentication
+- `generate2FASecretAction`  
+- `generateQRCodeAction`  
+- `verify2FAAction`  
+- `verifyLogin2FAAction`  
+- `verifyRecoveryCodeAction`  
+---
+
+## 🧩 Internal Improvements
+
+- Added new fields to the User model:  
+  - `twoFactorSecret`  
+  - `recoveryCodes`  
+-Add new table for save and manage token:
+ -  `identityUser_Tokens`
+
+---
+
+## ❗ Breaking Changes
+
+None.  
+Version 0.3.0 introduces multiple new features but does not break backwards compatibility with version 0.2.0.
+
+---
 0.2.0 – Major Action Updates, Bug Fixes
 
 Release date: 2025-11-26

@@ -24,6 +24,15 @@ const NEXTAUTH_ROUTE = path.join(
     "route.ts"
 );
 
+const sessionUpdateRoute = path.join(
+    PROJECT_BASE,
+    "app",
+    "api",
+    "session",
+    "update",
+    "route.ts"
+);
+
 async function ensureFolder(folder) {
     try {
         await fs.access(folder);
@@ -111,6 +120,7 @@ async function fixImportsInFolder(folder, newName) {
 
         // ensure route folder exists
         await ensureFolder(path.dirname(NEXTAUTH_ROUTE));
+        await ensureFolder(path.dirname(sessionUpdateRoute));
 
         // route.ts content
         const routeContent = `import NextAuth from "next-auth";
@@ -121,6 +131,57 @@ export { handler as GET, handler as POST };
 `;
 
         await fs.writeFile(NEXTAUTH_ROUTE, routeContent, "utf8");
+        //////////////////////// sessionUpdateRoute
+        const sessionRouteContent = `
+import { getServerSession } from 'next-auth';
+import { options } from '@/${newFolderName}/api/auth/[...nextauth]/options';
+import { NextResponse } from 'next/server';
+import dbConnect from '@/${newFolderName}/lib/db';
+import { getUserByUsernameForSessionAction } from '@/${newFolderName}/helper/userAction';
+
+export async function GET() {
+    try {
+        await dbConnect();
+        const session = await getServerSession(options);
+
+        if (!session?.user?.username) {
+            return NextResponse.json({ status: 'unauthenticated' }, { status: 401 });
+        }
+
+        // const user = await Users.findOne({ username: session.user.username }).populate('role', 'titleEN');
+        const user = await getUserByUsernameForSessionAction(session.user.username);
+        if (!user) {
+            return NextResponse.json({ status: 'notFound' }, { status: 404 });
+        }
+        const userPayload = user.payload;
+
+        return NextResponse.json({
+            status: 'success',
+            user: {
+                id: userPayload?.id.toString(),
+                username: userPayload?.username,
+                name: userPayload?.name,
+                email: userPayload?.email,
+                phoneNumber: userPayload?.phoneNumber,
+                avatar: userPayload?.avatar,
+                securityStamp: userPayload?.securityStamp,
+                roles: userPayload?.roles,
+                claims: userPayload?.claims,
+                emailConfirmed: userPayload?.emailConfirmed,
+                phoneNumberConfirmed: userPayload?.phoneNumberConfirmed,
+                twoFactorEnabled: userPayload?.twoFactorEnabled,
+
+            },
+        });
+    } catch (error) {
+        return NextResponse.json({ status: 'error', message: 'Internal server error' }, { status: 500 });
+    }
+}
+`;
+
+        await fs.writeFile(sessionUpdateRoute, sessionRouteContent, "utf8");
+
+
 
         console.log("✅ identityuser installed successfully!");
     } catch (err) {
