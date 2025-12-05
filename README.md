@@ -357,7 +357,7 @@ Contributions, issues, and feature requests are welcome.
 
 ## 0.3.0 – Full Verification System, Forgot Password, and TOTP 2FA
 
-**Release Date:** 2025-02-05
+**Release Date:** 2025-12-05
 
 This release introduces the most advanced security features added to IdentityUser so far.  
 A complete verification system is now available, including password recovery, email/phone verification, and full TOTP-based two-factor authentication.
