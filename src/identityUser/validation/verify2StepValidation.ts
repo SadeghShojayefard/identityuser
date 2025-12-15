@@ -7,6 +7,7 @@ export const verify2StepSchema = () => {
             .string(),
         token: z
             .string(),
+<<<<<<< HEAD
         remember: z
             .string()
             .optional()
@@ -15,6 +16,8 @@ export const verify2StepSchema = () => {
             .string()
             .optional()
             .transform(val => val === "on"),
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
     })
 };
 

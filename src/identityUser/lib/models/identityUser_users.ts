@@ -29,12 +29,15 @@ const identityUser_usersSchema = new Schema(
             type: Schema.Types.String,
             required: true
         },
+<<<<<<< HEAD
         passwordLastChanged:
         {
             type: Date,
             default: Date.now,
             required: true
         },
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
         securityStamp: {
             type: Schema.Types.UUID,
             required: true

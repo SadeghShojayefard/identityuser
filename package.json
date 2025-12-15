@@ -1,23 +1,37 @@
 {
   "name": "identityuser",
+<<<<<<< HEAD
   "version": "0.4.0",
+=======
+  "version": "0.3.0",
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
   "description": "Identity & Claims system for Next.js (CLI + Copyable template)",
   "bin": {
     "identityuser": "init.js"
   },
   "private": false,
   "scripts": {
+<<<<<<< HEAD
     "postinstall": "node security-check.js",
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
     "test": "echo \"No tests yet\""
   },
   "peerDependencies": {
     "@conform-to/zod": ">=1.13.3",
     "bcrypt": ">=6.0.0",
     "mongoose": ">=8.15.1",
+<<<<<<< HEAD
     "next": ">=15.5.7",
     "next-auth": ">=4",
     "react": ">=19.0.0",
     "react-dom": ">=19.0.0",
+=======
+    "next": ">=15",
+    "next-auth": ">=4",
+    "react": ">=18",
+    "react-dom": ">=18",
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
     "zod": ">=3.25.76",
     "resend": ">=6",
     "@upstash/ratelimit": ">=2",

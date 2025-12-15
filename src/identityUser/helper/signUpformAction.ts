@@ -72,7 +72,10 @@ export async function signUpformAction(prevState: unknown, formData: FormData) {
             normalizedEmail: email.toUpperCase(),
             emailConfirmed: false,
             passwordHash: encryptPassword,
+<<<<<<< HEAD
             passwordLastChanged: new Date(),
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
             securityStamp: randomUUID(),
             concurrencyStamp: randomUUID(),
             phoneNumberConfirmed: false,

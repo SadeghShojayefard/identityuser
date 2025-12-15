@@ -3,15 +3,26 @@ import dbConnect from "@/identityuser/lib/db";
 import { SignInSchema } from "@/identityuser/validation/signInValidation";
 import { parseWithZod } from "@conform-to/zod";
 import identityUser_users from "@/identityuser/lib/models/identityUser_users";
+<<<<<<< HEAD
 import { checkUserExistByEmailAction, checkUserExistByPhoneNumberAction, checkUserExistByUserNameAction, getUserByEmailAction, getUserByPhoneNumberAction } from "./userAction";
 import { forgetPasswordSchema } from "../validation/forgetPasswordValidation";
 import identityUser_Tokens from "@/identityuser/lib/models/identityUser_Tokens";
 import { checkOldPassword, comparePassword, hashPassword, savePasswordToHistory } from "./sharedFunction";
+=======
+import { checkUserExistByEmailAction, checkUserExistByPhoneNumberAction, checkUserExistByUserNameAction, getUserByEmailAction } from "./userAction";
+import { forgetPasswordSchema } from "../validation/forgetPasswordValidation";
+import identityUser_Tokens from "@/identityuser/lib/models/identityUser_Tokens";
+import { comparePassword, hashPassword } from "./sharedFunction";
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
 import { randomBytes } from "crypto";
 import { Resend } from "resend";
 import { resetPasswordSchema } from "../validation/resetPasswordValidation";
 import { headers } from "next/headers";
+<<<<<<< HEAD
 import { emailLimiter, globalLimiter, ipLimiter, loginIpLimiter, loginUserLimiter, PhoneLimiter } from "../lib/utils/rateLimit";
+=======
+import { emailLimiter, globalLimiter, ipLimiter, PhoneLimiter } from "../lib/utils/rateLimit";
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
 import { otpValidationSchema } from "../validation/otpValidation";
 import { emailVerifySchema } from "@/identityuser/validation/emailVerifyValidation";
 import { randomUUID } from "crypto";
@@ -21,6 +32,7 @@ import QRCode from "qrcode";
 import { twoStepEnableSchema } from "../validation/twoStepEnableValidation";
 import { verify2FASchema } from "../validation/verify2FAValidation";
 import { verify2StepSchema } from "../validation/verify2StepValidation";
+<<<<<<< HEAD
 import crypto from "crypto";
 import { cookies } from "next/headers";
 import { signInOTPSchema } from "../validation/signInOTPValidation";
@@ -34,6 +46,11 @@ export async function signInFormAction(prevState: unknown, formData: FormData) {
 
         const h = await headers();
         const ip = (h.get("x-forwarded-for") ?? "unknown").split(",")[0].trim();
+=======
+
+export async function signInFormAction(prevState: unknown, formData: FormData) {
+    try {
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
 
         const subMission = parseWithZod(formData, {
             schema: SignInSchema(),
@@ -48,6 +65,7 @@ export async function signInFormAction(prevState: unknown, formData: FormData) {
 
         const username = subMission.value.userName;
         const password = subMission.value.password;
+<<<<<<< HEAD
         const rememberMe = subMission.value.rememberMe;
 
         const userKey = `login:user:${username}`;
@@ -76,6 +94,8 @@ export async function signInFormAction(prevState: unknown, formData: FormData) {
             } as const;
         }
 
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
         await dbConnect();
         // 1)Check if username exist or not
         const user = await identityUser_users.findOne({ username });
@@ -85,12 +105,20 @@ export async function signInFormAction(prevState: unknown, formData: FormData) {
                 status: "success",
                 payload: {
                     username,
+<<<<<<< HEAD
                     password,
                     rememberMe,
                     message: "Username or Password is wrong"
                 }
             } as const;
         }
+=======
+                    password
+                }
+            } as const;
+        }
+
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
         const isCorrect = await comparePassword(password, user.passwordHash);
 
         if (!isCorrect) {
@@ -98,13 +126,18 @@ export async function signInFormAction(prevState: unknown, formData: FormData) {
                 status: "success",
                 payload: {
                     username,
+<<<<<<< HEAD
                     password,
                     rememberMe,
                     message: "Username or Password is wrong"
+=======
+                    password
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
                 }
             } as const;
         }
 
+<<<<<<< HEAD
 
         // 3) If 2FA enable
         if (user.twoFactorEnabled) {
@@ -144,12 +177,30 @@ export async function signInFormAction(prevState: unknown, formData: FormData) {
 
         // 4) If two step disable
 
+=======
+        // If 2FA enable
+        if (user.twoFactorEnabled === true) {
+            return {
+                status: "success-2fa",
+                payload: {
+                    username,
+                    password
+                }
+            } as const;
+        }
+
+        // If two step disable
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
         return {
             status: "success",
             payload: {
                 username,
+<<<<<<< HEAD
                 password,
                 rememberMe
+=======
+                password
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
             }
         } as const;
     } catch (error) {
@@ -157,12 +208,16 @@ export async function signInFormAction(prevState: unknown, formData: FormData) {
             status: 'error',
             payload: {
                 message: 'Something wrong please try later',
+<<<<<<< HEAD
                 retryAfterMs: 0,
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
             },
         } as const;
     }
 }
 
+<<<<<<< HEAD
 export async function createPhoneLoginOTP(prevState: unknown, formData: FormData) {
     try {
 
@@ -335,6 +390,8 @@ export async function createPhoneLoginOTP(prevState: unknown, formData: FormData
 }
 
 
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
 export async function canUserSignInAction(username: string) {
 
     try {
@@ -744,6 +801,7 @@ export async function resetForgetPasswordAction(prevState: unknown, formData: Fo
             } as const;
         }
 
+<<<<<<< HEAD
         // 3)check old password
 
         const oldPasswordresult = await checkOldPassword(matchedRecord.user, password);
@@ -771,6 +829,16 @@ export async function resetForgetPasswordAction(prevState: unknown, formData: Fo
         await savePasswordToHistory(matchedRecord.user, hashed);
 
         // 6) Delete the token so it cannot be reused
+=======
+        // 3) Update user password
+        const hashed = await hashPassword(password);
+
+        await identityUser_users.findByIdAndUpdate(matchedRecord.user, {
+            passwordHash: hashed
+        });
+
+        // 4) Delete the token so it cannot be reused
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
         await identityUser_Tokens.deleteOne({ _id: matchedRecord._id });
 
         return {
@@ -821,7 +889,11 @@ async function createPhonePasswordResetTokenAction(userId: string, phoneNumber: 
 
         const userPhone = await identityUser_users.findOne({ phoneNumber: phoneNumber.trim() });
 
+<<<<<<< HEAD
         // store new OTP record (expireAt 2 min here — you can set 2*60*1000 if you want 2 minutes)
+=======
+        // store new OTP record (expireAt 1 min here — you can set 2*60*1000 if you want 2 minutes)
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
         await identityUser_Tokens.create({
             user: userPhone?._id,
             identifier: phoneNumber,
@@ -987,7 +1059,11 @@ export async function createEmailVerificationToken(prevState: unknown, formData:
         user: id,
         type: "email-verify",
     });
+<<<<<<< HEAD
     //3. Check the token expire or not if exist
+=======
+    //3. Check the token expire of not if exist
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
     if (existingToken && existingToken.expireAt > new Date()) {
         return {
             status: "error",
@@ -1149,7 +1225,11 @@ export async function creatPhoneVerificationOTP(prevState: unknown, formData: Fo
         }
         const { id } = submission.value;
 
+<<<<<<< HEAD
         // 1. check if user phone already verify or not
+=======
+        // 1. check if user email already verify or not
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
         const existUser = await identityUser_users.findById(id);
 
         if (existUser.phoneNumberConfirmed) {
@@ -1188,7 +1268,11 @@ export async function creatPhoneVerificationOTP(prevState: unknown, formData: Fo
         const otp = generateNumericOTP(6); // helper below
         const hashedOtp = await hashPassword(otp);
 
+<<<<<<< HEAD
         //6. store new OTP record (expireAt 2 min here — you can set 2*60*1000 if you want 2 minutes)
+=======
+        //6. store new OTP record (expireAt 1 min here — you can set 2*60*1000 if you want 2 minutes)
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
         const newToken = await identityUser_Tokens.create({
             user: id,
             identifier: existUser.phoneNumber.trim(),
@@ -1326,6 +1410,7 @@ export async function verifyPhoneAction(prevState: unknown, formData: FormData) 
     }
 }
 
+<<<<<<< HEAD
 export async function verifyPhoneForLoginFormAction(prevState: unknown, formData: FormData) {
     // 1) validate input
     const submission = parseWithZod(formData, {
@@ -1447,6 +1532,8 @@ export async function verifyPhoneForCredentialAction(phoneNumber: string, otp: s
     }
 }
 
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
 ////////////////////////  BLOCK OF 2FA //////////////////////////////
 
 
@@ -1477,11 +1564,14 @@ export async function generate2FASecretAction(prevState: unknown, formData: Form
             user.securityStamp = randomUUID(); // logs out sessions
             await user.save();
 
+<<<<<<< HEAD
 
             const cookieStore = cookies();
             (await cookieStore).delete("identity_2fa_browser");
 
 
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
             return {
                 status: "success",
                 payload: {
@@ -1581,7 +1671,11 @@ export async function verify2FAAction(prevState: unknown, formData: FormData) {
                 payload: { message: "User or secret not found" }
             } as const;
         }
+<<<<<<< HEAD
         authenticator.options = { window: 1 };
+=======
+
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
         const isValid = authenticator.verify({
             token,
             secret: user.twoFactorSecret
@@ -1617,7 +1711,11 @@ export async function verify2FAAction(prevState: unknown, formData: FormData) {
 }
 
 
+<<<<<<< HEAD
 export async function verifyLoginForm2FAAction(prevState: unknown, formData: FormData) {
+=======
+export async function verifyLogin2FAAction(prevState: unknown, formData: FormData) {
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
 
     try {
         const subMission = parseWithZod(formData, {
@@ -1630,6 +1728,7 @@ export async function verifyLoginForm2FAAction(prevState: unknown, formData: For
                 payload: { message: subMission.reply() }
             } as const;
         }
+<<<<<<< HEAD
         const { username, token, remember, emailOrOTP } = subMission.value;
 
         return {
@@ -1661,12 +1760,21 @@ export async function verifyLogin2FACredentialAction(username: string, token: st
         const existUser = await identityUser_users.findOne({ username });
 
         if (!existUser) {
+=======
+        const { username, token } = subMission.value;
+
+        await dbConnect();
+        const user = await identityUser_users.findOne({ username });
+
+        if (!user) {
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
             return {
                 status: "error",
                 payload: { message: "User not found" }
             } as const;
         }
 
+<<<<<<< HEAD
         if (emailOrOTP) {
 
 
@@ -1754,6 +1862,33 @@ export async function verifyLogin2FACredentialAction(username: string, token: st
                 }
             } as const;
         }
+=======
+        if (!user.twoFactorEnabled || !user.twoFactorSecret) {
+            return {
+                status: "error",
+                payload: { message: "Two-step authentication is not enabled" }
+            } as const;
+        }
+        // allow +/- 1 time step (30s) window
+        authenticator.options = { window: 1 };
+
+        const verified = authenticator.check(String(token).trim(), user.twoFactorSecret);
+
+        if (!verified) {
+            return {
+                status: "error",
+                payload: { message: "Invalid authentication code" }
+            } as const;
+        }
+
+        return {
+            status: "success",
+            payload: {
+                message: "Verification passed",
+                username: user.username,
+            }
+        } as const;
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
     }
     catch (error) {
         return {
@@ -1765,8 +1900,12 @@ export async function verifyLogin2FACredentialAction(username: string, token: st
     }
 }
 
+<<<<<<< HEAD
 
 export async function verifyRecoveryCodeFormAction(prevState: unknown, formData: FormData) {
+=======
+export async function verifyRecoveryCodeAction(prevState: unknown, formData: FormData) {
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
     try {
         const submission = parseWithZod(formData, { schema: verify2StepSchema() });
         if (submission.status !== "success") {
@@ -1776,6 +1915,7 @@ export async function verifyRecoveryCodeFormAction(prevState: unknown, formData:
             } as const;
         }
 
+<<<<<<< HEAD
         const { username, token, remember } = submission.value;
 
 
@@ -1800,6 +1940,9 @@ export async function verifyRecoveryCodeFormAction(prevState: unknown, formData:
 export async function verifyRecoveryCodeCredentialAction(username: string, token: string) {
     try {
 
+=======
+        const { username, token } = submission.value;
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
 
         await dbConnect();
 
@@ -1850,6 +1993,7 @@ export async function verifyRecoveryCodeCredentialAction(username: string, token
 
 }
 
+<<<<<<< HEAD
 export async function create2FA_FallBackToken(prevState: unknown, formData: FormData) {
 
     const submission = parseWithZod(formData, {
@@ -1942,6 +2086,8 @@ async function sendFallbackTokenForEmail(to: string, rawCodes: string) {
         return false;
     }
 }
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
 
 /* ----------------- helper: secure numeric OTP ----------------- */
 function generateNumericOTP(length: number) {
@@ -1979,6 +2125,7 @@ async function generateRecoveryCodes(count: number = 10, length: number = 8) {
         rawCodes
     };
 }
+<<<<<<< HEAD
 
 
 
@@ -2065,3 +2212,5 @@ function verifyRememberToken(tokenBase64: string, currentUserAgent: string) {
 
 // PASSWORD_EXPIRE_MINs =1
 // PASSWORD_EXPIRE_DAYS =60
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09

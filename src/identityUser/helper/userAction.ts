@@ -2,7 +2,11 @@
 import { parseWithZod } from "@conform-to/zod";
 import { revalidatePath } from "next/cache";
 import dbConnect from "@/identityuser/lib/db";
+<<<<<<< HEAD
 import { checkOldPassword, comparePassword, hashPassword, savePasswordToHistory } from "./sharedFunction";
+=======
+import { comparePassword, hashPassword } from "./sharedFunction";
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
 
 import identityUser_users from "@/identityuser/lib/models/identityUser_users";
 import identityUser_userClaims from "@/identityuser/lib/models/identityUser_userClaims"
@@ -23,8 +27,11 @@ import { changeUserNameSchema } from "../validation/changeUserNameValidation";
 import { changeEmailSchema } from "../validation/changeEmailValidation";
 import identityUser_roleClaims from "../lib/models/identityUser_roleClaims";
 import { changePhoneNumebrSchema } from "../validation/changePhoneNumebrValidation";
+<<<<<<< HEAD
 import { cookies } from "next/headers";
 import identityUser_passwordHistory from "../lib/models/identityUser_passwordHistory";
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
 
 export async function AddUserAction(prevState: unknown, formData: FormData) {
     // if (!(await hasClaim("add-user"))) {
@@ -82,7 +89,10 @@ export async function AddUserAction(prevState: unknown, formData: FormData) {
             normalizedEmail: email.toUpperCase(),
             emailConfirmed: false,
             passwordHash: encryptPassword,
+<<<<<<< HEAD
             passwordLastChanged: new Date(),
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
             securityStamp: randomUUID(),
             concurrencyStamp: randomUUID(),
             phoneNumber: "",
@@ -208,6 +218,7 @@ export async function UserUpdateAction(prevState: unknown, formData: FormData) {
         }
 
         /// user this if only you want have uniq phoneNumber
+<<<<<<< HEAD
         if (phoneNumber) {
             if (phoneNumber !== existingUser.phoneNumber) {
                 const emailExists = await checkUserExistByPhoneNumberAction(phoneNumber);
@@ -219,6 +230,17 @@ export async function UserUpdateAction(prevState: unknown, formData: FormData) {
                 }
             }
         }
+=======
+        // if (phoneNumber !== existingUser.phoneNumber) {
+        //     const emailExists = await checkUserExistByPhoneNumberAction(phoneNumber);
+        //     if (emailExists.status === "success") {
+        //         return {
+        //             status: "error",
+        //             payload: { message: "Email already exists." },
+        //         } as const;
+        //     }
+        // }
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
 
         //  Auxiliary variable for detecting important changes
         let sensitiveChanged = false;
@@ -398,17 +420,24 @@ export async function resetPasswordAction(prevState: unknown, formData: FormData
 
     try {
         await dbConnect();
+<<<<<<< HEAD
 
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
         const {
             id,
             password,
         } = subMission.value;
+<<<<<<< HEAD
 
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
         const existingUser = await identityUser_users.findOne({ _id: id });
         if (!existingUser) {
             return {
                 status: 'error',
                 payload: {
+<<<<<<< HEAD
                     message: "user Not Exist",
                 },
             } as const;
@@ -426,18 +455,28 @@ export async function resetPasswordAction(prevState: unknown, formData: FormData
         }
 
         /// save new password
+=======
+                    message: "userNotExist",
+                },
+            } as const;
+        }
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
         const encryptPassword = await hashPassword(password);
         await identityUser_users.findByIdAndUpdate(
             existingUser._id,
             {
                 $set: {
                     passwordHash: encryptPassword,
+<<<<<<< HEAD
                     passwordLastChanged: new Date(),
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
                     securityStamp: randomUUID(),
                 }
             },
         ).exec();
 
+<<<<<<< HEAD
         //save password in history table
         await savePasswordToHistory(id, encryptPassword);
 
@@ -449,6 +488,8 @@ export async function resetPasswordAction(prevState: unknown, formData: FormData
             },
         } as const;
 
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
         return {
             status: "success",
             payload: {
@@ -468,6 +509,7 @@ export async function resetPasswordAction(prevState: unknown, formData: FormData
 }
 
 export async function changePasswordAction(prevState: unknown, formData: FormData) {
+<<<<<<< HEAD
     // if (!(await hasAnyClaim())) {
     //     return {
     //         status: 'error',
@@ -476,6 +518,16 @@ export async function changePasswordAction(prevState: unknown, formData: FormDat
     //         },
     //     } as const;
     // }
+=======
+    if (!(await hasAnyClaim())) {
+        return {
+            status: 'error',
+            payload: {
+                message: 'no access for this action',
+            },
+        } as const;
+    }
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
     const subMission = parseWithZod(formData, {
         schema: changePasswordSchema(),
     });
@@ -524,6 +576,7 @@ export async function changePasswordAction(prevState: unknown, formData: FormDat
             } as const;
         }
 
+<<<<<<< HEAD
         ////////// check old password
 
         const oldPasswordresult = await checkOldPassword(existingUser._id, newPassword);
@@ -540,22 +593,33 @@ export async function changePasswordAction(prevState: unknown, formData: FormDat
 
         const encryptPassword = await hashPassword(newPassword);
         //change password
+=======
+        const encryptPassword = await hashPassword(newPassword);
+
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
         await identityUser_users.findByIdAndUpdate(
             existingUser._id,
             {
                 $set: {
                     passwordHash: encryptPassword,
+<<<<<<< HEAD
                     passwordLastChanged: new Date(),
                     securityStamp: randomUUID(),
                     concurrencyStamp: randomUUID(),
 
+=======
+                    securityStamp: randomUUID(),
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
                 }
             },
         ).exec();
 
+<<<<<<< HEAD
         //save password in history table
         await savePasswordToHistory(existingUser._id, encryptPassword);
 
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
         return {
             status: "success",
             payload: {
@@ -574,6 +638,7 @@ export async function changePasswordAction(prevState: unknown, formData: FormDat
     }
 }
 
+<<<<<<< HEAD
 export async function disable2FAdAction(prevState: unknown, formData: FormData) {
     // if (!(await hasAnyClaim())) {
     //     return {
@@ -641,6 +706,8 @@ export async function disable2FAdAction(prevState: unknown, formData: FormData) 
     }
 }
 
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
 export async function getAllUsersAction() {
     try {
         await dbConnect();
@@ -817,6 +884,7 @@ export async function getUserByUsernameForSessionAction(username: string) {
     // 1) Find User by Username
     const user = await identityUser_users.findOne({ username });
     if (!user) {
+<<<<<<< HEAD
         return {
             status: "error",
             payload: {
@@ -848,6 +916,13 @@ export async function getUserByPhoneForSessionAction(phone: string) {
 async function sessionData(user: any) {
 
     const userId = user._id.toString();
+=======
+        return { status: "error", message: "User not found" };
+    }
+
+    const userId = user._id.toString();
+
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
     // 2) Find User Roles
     const userRoles = await identityUser_userRoles.find({ user: userId })
         .populate({
@@ -901,7 +976,10 @@ async function sessionData(user: any) {
             avatar: user.avatar,
             securityStamp: user.securityStamp,
             password: user.passwordHash,
+<<<<<<< HEAD
             passwordLastChanged: user.passwordLastChanged,
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
             roles: roleNames,          //  String array
             claims: mergedClaims,      // String array without duplicates
             emailConfirmed: user.emailConfirmed,
@@ -911,7 +989,10 @@ async function sessionData(user: any) {
     } as const;
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
 export async function getUserByPhoneNumberAction(phoneNumber: string) {
     await dbConnect();
     // use this action only when use phoneNumber as uniq field for each user

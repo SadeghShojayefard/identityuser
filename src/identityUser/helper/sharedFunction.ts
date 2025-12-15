@@ -1,5 +1,8 @@
 import bcrypt from "bcrypt";
+<<<<<<< HEAD
 import identityUser_passwordHistory from "../lib/models/identityUser_passwordHistory";
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
 
 
 
@@ -14,6 +17,7 @@ export const comparePassword = async (inputPassword: string, userPassword: strin
     return valid;
 }
 
+<<<<<<< HEAD
 
 export const checkOldPassword = async (userId: string, newPassword: string) => {
     const passwordHistory = await identityUser_passwordHistory.find({ user: userId })
@@ -62,3 +66,5 @@ export const checkPasswordExpire = (passwordLastChanged: Date) => {
 }
 
 
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09

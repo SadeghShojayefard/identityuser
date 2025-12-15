@@ -1,6 +1,7 @@
 import CredentialsProvider from 'next-auth/providers/credentials';
 import type { NextAuthOptions } from 'next-auth';
 import identityUser_users from '@/identityuser/lib/models/identityUser_users';
+<<<<<<< HEAD
 import { checkPasswordExpire, comparePassword } from '@/identityuser/helper/sharedFunction';
 import dbConnect from '@/identityuser/lib/db';
 import { getUserByPhoneForSessionAction, getUserByUsernameForSessionAction } from '@/identityuser/helper/userAction';
@@ -25,24 +26,43 @@ export const options: NextAuthOptions = {
     providers: [
         CredentialsProvider({
             id: "credentials",
+=======
+import { comparePassword } from '@/identityuser/helper/sharedFunction';
+import dbConnect from '@/identityuser/lib/db';
+import { getUserByUsernameForSessionAction } from '@/identityuser/helper/userAction';
+
+export const options: NextAuthOptions = {
+    session: {
+        strategy: 'jwt',
+    },
+    providers: [
+        CredentialsProvider({
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
             name: 'Credentials',
             credentials: {
                 username: { label: 'Username', type: 'text' },
                 password: { label: 'Password', type: 'password' },
+<<<<<<< HEAD
                 rememberMe: { label: "Remember Me", type: "checkbox" },
 
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
             },
             async authorize(credentials) {
                 if (!credentials) return null;
                 const { username, password } = credentials;
 
+<<<<<<< HEAD
                 const rememberMe =
                     credentials.rememberMe === "true" ||
                     credentials.rememberMe === "on";
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
                 await dbConnect();
                 const user = await getUserByUsernameForSessionAction(username);
 
                 if (!user) return null;
+<<<<<<< HEAD
 
                 if (!hasPayload(user) || user.status === "error") { return null }
 
@@ -53,6 +73,12 @@ export const options: NextAuthOptions = {
 
                 const expired = await checkPasswordExpire(userData.passwordLastChanged);
 
+=======
+                const userData = user.payload;
+
+                if (!userData?.password) return null;
+
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
                 const isValid = await comparePassword(password, userData.password);
                 if (!isValid) return null;
 
@@ -69,6 +95,7 @@ export const options: NextAuthOptions = {
                     emailConfirmed: userData.emailConfirmed,
                     phoneNumberConfirmed: userData.phoneNumberConfirmed,
                     twoFactorEnabled: userData.twoFactorEnabled,
+<<<<<<< HEAD
                     rememberMe: expired ? false : rememberMe,
                     passwordExpire: expired
                 };
@@ -251,6 +278,8 @@ export const options: NextAuthOptions = {
                     rememberMe: expired ? false : rememberMe,
                     passwordExpire: expired
 
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
                 };
             },
         }),
@@ -258,6 +287,10 @@ export const options: NextAuthOptions = {
 
     callbacks: {
         async jwt({ token, user, trigger, session }) {
+<<<<<<< HEAD
+=======
+
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
             if (user) {
                 token.id = user.id;
                 token.username = user.username;
@@ -271,10 +304,13 @@ export const options: NextAuthOptions = {
                 token.emailConfirmed = user.emailConfirmed;
                 token.phoneNumberConfirmed = user.phoneNumberConfirmed;
                 token.twoFactorEnabled = user.twoFactorEnabled;
+<<<<<<< HEAD
                 token.lastSync = Date.now();
                 token.rememberMe = user.rememberMe;
                 token.loginAt = Date.now();
                 token.passwordExpire = user.passwordExpire;
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
             }
 
             if (trigger === "update" && session?.user) {
@@ -319,6 +355,7 @@ export const options: NextAuthOptions = {
                 await dbConnect();
 
                 //Read new user information from the database
+<<<<<<< HEAD
                 const freshUser = (await getUserByUsernameForSessionAction(token.username));
 
                 if (!freshUser) { }
@@ -331,6 +368,16 @@ export const options: NextAuthOptions = {
                         token.securityStamp = userData.securityStamp;
                     }
                 }
+=======
+                const freshUser = (await getUserByUsernameForSessionAction(token.username)).payload;
+
+                if (freshUser) {
+                    token.roles = freshUser.roles;
+                    token.claims = freshUser.claims;
+                    token.securityStamp = freshUser.securityStamp;
+                }
+
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
                 token.lastSync = Date.now();
             }
             return token;
@@ -362,6 +409,7 @@ export const options: NextAuthOptions = {
 
 
 
+<<<<<<< HEAD
             const freshUser = (await getUserByUsernameForSessionAction(user.username));
 
             let expired = false;
@@ -415,6 +463,49 @@ export const options: NextAuthOptions = {
             }
 
 
+=======
+            const freshUser = (await getUserByUsernameForSessionAction(user.username)).payload;
+
+            // ------------------------------------------
+            // Compare roles
+            // ------------------------------------------
+            if (freshUser?.roles) {
+                const currentRoles = [...(token.roles || [])].sort();
+                const newRoles = [...freshUser.roles].sort();
+
+                const rolesChanged =
+                    currentRoles.length !== newRoles.length ||
+                    currentRoles.some((r, i) => r !== newRoles[i]);
+
+                if (rolesChanged) {
+                    return {
+                        ...session,
+                        user: undefined,
+                        expires: new Date(0).toISOString(),
+                    };
+                }
+            }
+
+            // ------------------------------------------
+            // Compare claims 
+            // ------------------------------------------
+            if (freshUser?.claims) {
+                const currentClaims = [...(token.claims || [])].sort();
+                const newClaims = [...freshUser.claims].sort();
+
+                const claimsChanged =
+                    currentClaims.length !== newClaims.length ||
+                    currentClaims.some((c, i) => c !== newClaims[i]);
+
+                if (claimsChanged) {
+                    return {
+                        ...session,
+                        user: undefined,
+                        expires: new Date(0).toISOString(),
+                    };
+                }
+            }
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
             session.user = {
                 id: token.id as string,
                 username: token.username as string,
@@ -428,16 +519,26 @@ export const options: NextAuthOptions = {
                 emailConfirmed: token.emailConfirmed as boolean,
                 phoneNumberConfirmed: token.phoneNumberConfirmed as boolean,
                 twoFactorEnabled: token.twoFactorEnabled as boolean,
+<<<<<<< HEAD
                 rememberMe: token.rememberMe as boolean,
                 loginAt: token.loginAt as Date,
                 passwordExpire: token.passwordExpire as boolean,
 
+=======
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
             };
             return session;
         },
 
+<<<<<<< HEAD
     },
 };
 
 
 
+=======
+    }
+};
+
+
+>>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
