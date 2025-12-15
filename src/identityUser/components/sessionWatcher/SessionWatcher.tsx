@@ -33,7 +33,6 @@ export default function SessionWatcher({ locale }: { locale: string }) {
         return () => window.removeEventListener("storage", handler);
     }, [locale]);
 
-<<<<<<< HEAD
 
     useEffect(() => {
         if (!session?.user) return;
@@ -74,7 +73,5 @@ export default function SessionWatcher({ locale }: { locale: string }) {
 
 
 
-=======
->>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
     return null;
 }

@@ -13,7 +13,6 @@ export const resetPasswordLimiter = new Ratelimit({
     limiter: Ratelimit.slidingWindow(1, "2 m"), // 1 request per 2 minutes
     analytics: true,
 });
-<<<<<<< HEAD
 
 /* ------------------ Init Upstash ------------------ */
 const upstashUrl = process.env.UPSTASH_REDIS_REST_URL!;
@@ -65,5 +64,3 @@ export const loginIpLimiter = new Ratelimit({
     redis: redisInstance,
     limiter: Ratelimit.slidingWindow(20, "10m"),
 });
-=======
->>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09

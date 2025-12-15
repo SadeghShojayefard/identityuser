@@ -21,7 +21,6 @@ Perfect for developers who want a clean, modular, and production-ready user syst
 
 ---
 ---
-<<<<<<< HEAD
 ## 🔐 Advanced Authentication & Security (New in v0.4.0)
 
 IdentityUser v0.4.0 introduces major improvements to authentication flows, password policies, and session handling — making it suitable for production-grade and enterprise-level applications.
@@ -103,8 +102,6 @@ JWT & Session configuration:
 - No insecure partial-login states
 ---
 ---
-=======
->>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
 
 ## 🔗 Related Links & Resources
 
@@ -250,10 +247,7 @@ identityUser folder
  ┃ ┣ 📂lib
  ┃ ┃ ┣ 📂models
  ┃ ┃ ┃ ┣ 📜identityUser_claims.ts
-<<<<<<< HEAD
  ┃ ┃ ┃ ┣ 📜identityUser_passwordHistory.ts
-=======
->>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
  ┃ ┃ ┃ ┣ 📜identityUser_roleClaims.ts
  ┃ ┃ ┃ ┣ 📜identityUser_roles.ts
  ┃ ┃ ┃ ┣ 📜identityUser_Tokens.ts
@@ -272,10 +266,6 @@ identityUser folder
  ┃ ┗ 📂validation
  ┃ ┃ ┣ 📜addUserValidation.ts
  ┃ ┃ ┣ 📜changeEmailValidation.ts
-<<<<<<< HEAD
-=======
- ┃ ┃ ┣ 📜changeEmailValidationy.ts
->>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
  ┃ ┃ ┣ 📜changeNameValidation.ts
  ┃ ┃ ┣ 📜changePassword.ts
  ┃ ┃ ┣ 📜ChangePasswordUserValidation.ts
@@ -284,18 +274,12 @@ identityUser folder
  ┃ ┃ ┣ 📜claimsValidation.ts
  ┃ ┃ ┣ 📜deleteValidation.ts
  ┃ ┃ ┣ 📜emailVerifyValidation.ts
-<<<<<<< HEAD
  ┃ ┃ ┣ 📜fallbackValidation.ts
-=======
->>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
  ┃ ┃ ┣ 📜forgetPasswordValidation.ts
  ┃ ┃ ┣ 📜otpValidation.ts
  ┃ ┃ ┣ 📜phoneVerifyValidation.ts
  ┃ ┃ ┣ 📜resetPasswordValidation.ts
-<<<<<<< HEAD
  ┃ ┃ ┣ 📜signInOTPValidation.ts
-=======
->>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
  ┃ ┃ ┣ 📜signInValidation.ts
  ┃ ┃ ┣ 📜signUpValidation.ts
  ┃ ┃ ┣ 📜twoStepEnableValidation.ts
@@ -454,7 +438,6 @@ Contributions, issues, and feature requests are welcome.
 
 # 📜 Changelog
 
-<<<<<<< HEAD
 ## 0.4.0 – Advanced Authentication, Sessions & Password Policies
 
 **Release Date:** 2025-12-13
@@ -510,8 +493,6 @@ IdentityUser is now suitable for complex real-world authentication scenarios.
 ---
 ---
 
-=======
->>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
 ## 0.3.0 – Full Verification System, Forgot Password, and TOTP 2FA
 
 **Release Date:** 2025-12-05
@@ -675,7 +656,6 @@ Because:
 * No major architectural overhaul (so no 1.0.0 yet)
 
 ---
-<<<<<<< HEAD
 ## 🔐 Security
 
 This package follows responsible security practices.
@@ -687,9 +667,6 @@ Minimum supported versions:
 If older versions are detected during installation, a warning will be shown.
 This does not block installation but upgrading is strongly recommended.
 ---
-=======
-
->>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
 
 # 📄 License
 
@@ -699,12 +676,7 @@ MIT License — free for personal and commercial use.
 
 # ⭐ Support
 
-<<<<<<< HEAD
 If you like this package, don't forget to **star the GitHub repo**.
-=======
-If you like this package, don't forget to **star the GitHub repo** once uploaded!
-
->>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
 
 
 

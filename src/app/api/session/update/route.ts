@@ -3,10 +3,7 @@ import { options } from '@/identityuser/api/auth/[...nextauth]/options';
 import { NextResponse } from 'next/server';
 import dbConnect from '@/identityuser/lib/db';
 import { getUserByUsernameForSessionAction } from '@/identityuser/helper/userAction';
-<<<<<<< HEAD
 import { hasPayload } from '@/type/actionType.type';
-=======
->>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
 
 export async function GET() {
     try {
@@ -22,12 +19,9 @@ export async function GET() {
         if (!user) {
             return NextResponse.json({ status: 'notFound' }, { status: 404 });
         }
-<<<<<<< HEAD
 
         if (!hasPayload(user) || user.status === "error") { return null }
 
-=======
->>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
         const userPayload = user.payload;
 
         return NextResponse.json({
@@ -51,8 +45,4 @@ export async function GET() {
     } catch (error) {
         return NextResponse.json({ status: 'error', message: 'Internal server error' }, { status: 500 });
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09

@@ -41,11 +41,8 @@ declare module "next-auth" {
         emailConfirmed: boolean;
         phoneNumberConfirmed: boolean;
         twoFactorEnabled: boolean;
-<<<<<<< HEAD
         rememberMe: boolean;
         passwordExpire: Boolean;
-=======
->>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
     }
 }
 
@@ -63,14 +60,8 @@ declare module "next-auth/jwt" {
         emailConfirmed: boolean;
         phoneNumberConfirmed: boolean;
         twoFactorEnabled: boolean;
-<<<<<<< HEAD
         rememberMe: boolean;
         passwordExpire: Boolean;
         lastSync?: number;
-=======
-        lastSync?: number;
-
-
->>>>>>> be9c483b74454327489f9e0de268e1c6b4423d09
     }
 }
